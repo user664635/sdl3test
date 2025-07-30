@@ -1,7 +1,7 @@
-#version 460 core
+#version 310 es
 
-in vec4 color;
-out vec4 c;
+in highp vec4 color;
+out highp vec4 c;
 void main() {
   c = color;
 }

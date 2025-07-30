@@ -1,4 +1,4 @@
-#include <glad/gl.h>
+#include <GLES3/gl3.h>
 #include <stdio.h>
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
@@ -72,7 +72,8 @@ static void create_shader(void) {
   u32 pos_vert = compile(GL_VERTEX_SHADER, pos_vert_src);
   u32 light_frag = compile(GL_FRAGMENT_SHADER, light_frag_src);
   shader = link(2, pos_vert, light_frag);
-  //glUniformMatrix4fv(1, 1, 0, (f32 *)trans);
+  glUseProgram(shader);
+  glUniformMatrix4fv(1, 1, 0, (f32 *)trans);
   gl_error();
 
   puts("shader create success");
@@ -84,7 +85,6 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
                                    &renderer))
     return SDL_APP_FAILURE;
   SDL_GL_CreateContext(window);
-  gladLoadGL(SDL_GL_GetProcAddress);
   create_shader();
   return SDL_APP_CONTINUE;
 }
