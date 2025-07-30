@@ -12,6 +12,8 @@ constexpr int w = 1600, h = 800;
 typedef float f32;
 typedef uint32_t u32;
 typedef uint64_t u64;
+typedef f32 [[clang::matrix_type(3, 3)]] mat3;
+typedef f32 [[clang::matrix_type(3, 1)]] mat3x1;
 typedef f32 [[clang::matrix_type(4, 4)]] mat4;
 typedef f32 [[clang::ext_vector_type(2)]] vec2;
 typedef f32 [[clang::ext_vector_type(3)]] vec3;
@@ -100,8 +102,10 @@ void create_vao() {
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   if (!SDL_Init(SDL_INIT_VIDEO))
     return SDL_APP_FAILURE;
-  if (!SDL_CreateWindowAndRenderer("test", w, h, SDL_WINDOW_OPENGL, &window,
-                                   &renderer))
+  if (!SDL_CreateWindowAndRenderer("test", w, h,
+                                   SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS |
+                                       SDL_WINDOW_MOUSE_RELATIVE_MODE,
+                                   &window, &renderer))
     return SDL_APP_FAILURE;
   SDL_GL_CreateContext(window);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -122,11 +126,16 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   return SDL_APP_CONTINUE;
 }
 
-static vec4 dir;
+static vec3 dir;
+static f32 yaw, pit, rol;
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   switch (event->type) {
   case SDL_EVENT_QUIT:
     return SDL_APP_SUCCESS;
+  case SDL_EVENT_MOUSE_MOTION:
+    yaw -= event->motion.xrel * .01;
+    pit -= event->motion.yrel * .01;
+    break;
   case SDL_EVENT_KEY_DOWN:
     if (event->key.repeat)
       break;
@@ -179,8 +188,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   return SDL_APP_CONTINUE;
 }
 
-static vec4 trans[4] = {
-    {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, -1, 0, 1}};
+static vec4 view;
 static const f32 lw = 2.5e-3, speed = 1e-3;
 // static const vec2 a4 = {297, 210};
 static Vert obj[] = {
@@ -194,6 +202,8 @@ static Vert obj[] = {
 static const u32 indx[] = {0, 1, 2, 2, 1, 3,  4,  5, 6,
                            6, 5, 7, 8, 9, 10, 10, 9, 11};
 #define clk __builtin_readcyclecounter()
+#define sin __builtin_elementwise_sin
+#define cos __builtin_elementwise_cos
 SDL_AppResult SDL_AppIterate(void *appstate) {
   glClearColor(.5, .5, .5, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -201,8 +211,15 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   static f32 scale = 1000;
   glUseProgram(shader);
   glUniform2f(0, scale / w, scale / h);
-  trans[3] -= dir * speed;
-  glUniformMatrix4fv(1, 1, 0, (f32 *)trans);
+  vec4 rot[4] = {
+      {cos(yaw), 0, -sin(yaw), 0},
+      {0, 1, 0, 0},
+      {sin(yaw), 0, cos(yaw), 0},
+      {0, 0, 0, 1},
+  };
+  view += (rot[0] * dir.x +rot[1] * dir.y + rot[2] * dir.z) * speed;
+  glUniform3f(1, view.x, view.y, view.z);
+  glUniformMatrix4fv(2, 1, 0, (f32 *)rot);
   glBindVertexArray(vao);
   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(obj), obj);
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indx), indx);
