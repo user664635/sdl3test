@@ -14,6 +14,7 @@ typedef uint32_t u32;
 typedef uint64_t u64;
 typedef f32 [[clang::matrix_type(4, 4)]] mat4;
 typedef f32 [[clang::ext_vector_type(4)]] vec4;
+typedef f32 [[clang::ext_vector_type(2)]] vec2;
 
 #define gl_error()                                                             \
   for (u32 gl_err; (gl_err = glGetError());)                                   \
@@ -70,8 +71,6 @@ static void create_shader() {
   u32 pos_vert = compile(GL_VERTEX_SHADER, pos_vert_src);
   u32 light_frag = compile(GL_FRAGMENT_SHADER, light_frag_src);
   shader = link(2, pos_vert, light_frag);
-  glUseProgram(shader);
-  glUniform1f(0, 1);
   gl_error();
 
   puts("shader create success");
@@ -126,23 +125,33 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 }
 
 static f32 trans[4][4] = {
-    {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
-static const Vert obj[] = {{{-.5, -.5, -1, 1}, {1, 0, 0, 1}},
-                           {{0, -.5, -1, 1}, {0, 1, 0, 1}},
-                           {{0, .5, -1, 1}, {0, 0, 1, 1}}};
-static const u32 indx[] = {0, 1, 2};
+    {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, -1, 0, 1}};
+const f32 lw = 2.5e-3;
+const vec2 a4 = {297, 210};
+static Vert obj[] = {
+    {{-.25, 0, lw, 1}, {0, 0, 0, 1}},  {{.25, 0, lw, 1}, {0, 0, 0, 1}},
+    {{-.25, 0, -lw, 1}, {0, 0, 0, 1}}, {{.25, 0, -lw, 1}, {0, 0, 0, 1}},
+    {{-lw, 0, 0, 1}, {0, 0, 0, 1}},    {{lw, 0, 0, 1}, {0, 0, 0, 1}},
+    {{-lw, 0, -2.1, 1}, {0, 0, 0, 1}}, {{lw, 0, -2.1, 1}, {0, 0, 0, 1}},
+    {{-.5, 0, -1, 1}, {1, 1, 1, 1}},   {{.5, 0, -1, 1}, {1, 1, 1, 1}},
+    {{-.5, 1, -1, 1}, {1, 1, 1, 1}},   {{.5, 1, -1, 1}, {1, 1, 1, 1}},
+};
+static const u32 indx[] = {0, 1, 2, 2, 1, 3,  4,  5, 6,
+                           6, 5, 7, 8, 9, 10, 10, 9, 11};
 #define clk __builtin_readcyclecounter()
 SDL_AppResult SDL_AppIterate(void *appstate) {
   glClearColor(.5, .5, .5, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  static f32 scale = 1000;
   glUseProgram(shader);
+  glUniform2f(0, scale / w, scale / h);
   glUniformMatrix4fv(1, 1, 0, (f32 *)trans);
   glBindVertexArray(vao);
   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(obj), obj);
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indx), indx);
   glDrawElements(GL_TRIANGLES, sizeof(indx) / 4, GL_UNSIGNED_INT, 0);
-  // gl_error();
+  gl_error();
   SDL_GL_SwapWindow(window);
 
   return SDL_APP_CONTINUE;
