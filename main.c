@@ -13,8 +13,9 @@ typedef float f32;
 typedef uint32_t u32;
 typedef uint64_t u64;
 typedef f32 [[clang::matrix_type(4, 4)]] mat4;
-typedef f32 [[clang::ext_vector_type(4)]] vec4;
 typedef f32 [[clang::ext_vector_type(2)]] vec2;
+typedef f32 [[clang::ext_vector_type(3)]] vec3;
+typedef f32 [[clang::ext_vector_type(4)]] vec4;
 
 #define gl_error()                                                             \
   for (u32 gl_err; (gl_err = glGetError());)                                   \
@@ -103,38 +104,92 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
                                    &renderer))
     return SDL_APP_FAILURE;
   SDL_GL_CreateContext(window);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
   printf("GL Version: %s\n", glGetString(GL_VERSION));
   printf("GLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
   printf("GL Vendor: %s\n", glGetString(GL_VENDOR));
   printf("Core Profile: using OpenGL %s\n", glGetString(GL_VERSION));
 
   glEnable(GL_DEPTH_TEST);
+  // glEnable(GL_MULTISAMPLE);
   gl_error();
   create_shader();
   create_vao();
   return SDL_APP_CONTINUE;
 }
 
+static vec4 dir;
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   switch (event->type) {
   case SDL_EVENT_QUIT:
     return SDL_APP_SUCCESS;
+  case SDL_EVENT_KEY_DOWN:
+    if (event->key.repeat)
+      break;
+    switch (event->key.key) {
+    case 'w':
+      --dir.z;
+      break;
+    case 's':
+      ++dir.z;
+      break;
+    case 'a':
+      --dir.x;
+      break;
+    case 'd':
+      ++dir.x;
+      break;
+    case ' ':
+      ++dir.y;
+      break;
+    case 'c':
+      --dir.y;
+      break;
+    }
+    break;
+  case SDL_EVENT_KEY_UP:
+    if (event->key.repeat)
+      break;
+    switch (event->key.key) {
+    case 'w':
+      ++dir.z;
+      break;
+    case 's':
+      --dir.z;
+      break;
+    case 'a':
+      ++dir.x;
+      break;
+    case 'd':
+      --dir.x;
+      break;
+    case ' ':
+      --dir.y;
+      break;
+    case 'c':
+      ++dir.y;
+      break;
+    }
+    break;
   }
   return SDL_APP_CONTINUE;
 }
 
-static f32 trans[4][4] = {
+static vec4 trans[4] = {
     {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, -1, 0, 1}};
-const f32 lw = 2.5e-3;
-const vec2 a4 = {297, 210};
+static const f32 lw = 2.5e-3, speed = 1e-3;
+// static const vec2 a4 = {297, 210};
 static Vert obj[] = {
     {{-.25, 0, lw, 1}, {0, 0, 0, 1}},  {{.25, 0, lw, 1}, {0, 0, 0, 1}},
     {{-.25, 0, -lw, 1}, {0, 0, 0, 1}}, {{.25, 0, -lw, 1}, {0, 0, 0, 1}},
     {{-lw, 0, 0, 1}, {0, 0, 0, 1}},    {{lw, 0, 0, 1}, {0, 0, 0, 1}},
     {{-lw, 0, -2.1, 1}, {0, 0, 0, 1}}, {{lw, 0, -2.1, 1}, {0, 0, 0, 1}},
     {{-.5, 0, -1, 1}, {1, 1, 1, 1}},   {{.5, 0, -1, 1}, {1, 1, 1, 1}},
-    {{-.5, 1, -1, 1}, {1, 1, 1, 1}},   {{.5, 1, -1, 1}, {1, 1, 1, 1}},
+    {{-.5, 2, -1, 1}, {1, 1, 1, 1}},   {{.5, 2, -1, 1}, {1, 1, 1, 1}},
 };
 static const u32 indx[] = {0, 1, 2, 2, 1, 3,  4,  5, 6,
                            6, 5, 7, 8, 9, 10, 10, 9, 11};
@@ -146,6 +201,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   static f32 scale = 1000;
   glUseProgram(shader);
   glUniform2f(0, scale / w, scale / h);
+  trans[3] -= dir * speed;
   glUniformMatrix4fv(1, 1, 0, (f32 *)trans);
   glBindVertexArray(vao);
   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(obj), obj);
