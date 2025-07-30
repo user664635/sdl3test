@@ -59,8 +59,8 @@ static u32 link(...) {
 }
 
 static u32 shader;
-static u32 vao, vbo;
-static void create_shader(void) {
+static u32 vao, vbo, ebo;
+static void create_shader() {
   const char pos_vert_src[] = {
 #embed "pos.vert"
       , 0};
@@ -78,6 +78,22 @@ static void create_shader(void) {
 
   puts("shader create success");
 }
+void create_vao() {
+  glGenVertexArrays(1, &vao);
+  glGenBuffers(1, &vbo);
+  glGenBuffers(1, &ebo);
+  glBindVertexArray(vao);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+  u64 buffer_size = 65536;
+  glBufferData(GL_ARRAY_BUFFER, buffer_size, 0, GL_DYNAMIC_DRAW);
+  glVertexAttribPointer(0, 4, GL_FLOAT, 0, 32, 0);
+  glVertexAttribPointer(1, 4, GL_FLOAT, 0, 32, (void *)16);
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  gl_error();
+  puts("vao create success");
+}
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   if (!SDL_Init(SDL_INIT_VIDEO))
     return SDL_APP_FAILURE;
@@ -86,6 +102,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
     return SDL_APP_FAILURE;
   SDL_GL_CreateContext(window);
   create_shader();
+  create_vao();
   return SDL_APP_CONTINUE;
 }
 
