@@ -1,2 +1,2 @@
 CompileFlags:
-  Add: [-std=gnu2y, -Wall]
+  Add: [-std=gnu2y, -Wall, -fenable-matrix]
