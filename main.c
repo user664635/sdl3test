@@ -8,7 +8,7 @@
 
 static SDL_Window *window;
 static SDL_Renderer *renderer;
-constexpr u32 w = 1600, h = 700;
+constexpr u32 w = 1920, h = 1080;
 constexpr u64 N = 65536;
 
 #define gl_error()                                                             \
@@ -123,13 +123,13 @@ void create_vao() {
     for (u8 j = 0; j < 8; ++j)
       data[i][j] = -(ascii[i] >> j & 1);
 
-  //glGenTextures(1, &ui);
-  //glActiveTexture(GL_TEXTURE0);
-  //glBindTexture(GL_TEXTURE_2D, ui);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  //glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 8, 16 * 95, 0, GL_RED,
-  //             GL_UNSIGNED_BYTE, data);
+  glGenTextures(1, &ui);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, ui);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 8, 16 * 95, 0, GL_RED,
+               GL_UNSIGNED_BYTE, data);
 
   gl_error();
   puts("font texture generate success");
@@ -146,9 +146,11 @@ void create_vao() {
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   if (!SDL_Init(SDL_INIT_VIDEO))
     return SDL_APP_FAILURE;
-#define WFLAGS SDL_WINDOW_OPENGL //| SDL_WINDOW_HIGH_PIXEL_DENSITY
-  if (!SDL_CreateWindowAndRenderer("test", w, h, WFLAGS, &window, &renderer))
+#define WFLAGS SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY
+  if (!SDL_CreateWindowAndRenderer("test", w / 1.5, h / 1.5, WFLAGS, &window,
+                                   &renderer))
     return SDL_APP_FAILURE;
+  glViewport(0, 0, w, h);
   SDL_SetWindowRelativeMouseMode(window, 1);
   SDL_GL_CreateContext(window);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -173,7 +175,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 
 static vec3 dir;
 static f32 yaw, pit, rol;
-f32 scale = 2500;
+f32 scale = 3000;
 #define PI_2 1.57079632679489661922
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   switch (event->type) {
