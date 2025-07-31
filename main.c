@@ -8,7 +8,7 @@
 
 static SDL_Window *window;
 static SDL_Renderer *renderer;
-constexpr int w = 1600, h = 800;
+constexpr u32 w = 1600, h = 800;
 
 #define gl_error()                                                             \
   for (u32 gl_err; (gl_err = glGetError());)                                   \
@@ -240,7 +240,8 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   gl_error();
 
   void cv_run();
-  cv_run();
+  void cv_pixel(u8 *, u32, u32);
+  cv_pixel(pixel, w, h);
   return SDL_APP_CONTINUE;
 }
 

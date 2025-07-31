@@ -10,7 +10,13 @@ extern "C" void cv_init() {
   if (!cap.isOpened())
     return;
 }
-extern "C" void cv_pixel(u8 *pixel) {}
+extern "C" void cv_pixel(u8 *pixel, u32 w, u32 h) {
+  Mat image(h, w, CV_8UC3, pixel);
+  flip(image, image, 0);
+  imshow("pixel", image);
+  waitKey(1);
+}
+
 extern "C" void cv_run() {
   Mat frame;
   if (esc)
@@ -20,6 +26,5 @@ extern "C" void cv_run() {
     puts("empty");
   namedWindow("test", WINDOW_AUTOSIZE);
   imshow("test", frame);
-  if (cv::waitKey(1) == '\xb')
-    esc = 1;
+  waitKey(1);
 }
