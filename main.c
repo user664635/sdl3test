@@ -84,6 +84,7 @@ typedef struct {
 
 static u32 vao, vbo, ebo;
 static u32 ui_vao, ui_vbo, ui_ebo;
+static u32 ui, result;
 void create_vao() {
   glGenVertexArrays(1, &ui_vao);
   glGenBuffers(1, &ui_vbo);
@@ -97,7 +98,6 @@ void create_vao() {
   glEnableVertexAttribArray(0);
   gl_error();
   puts("ui_vao create success");
-  glBindVertexArray(0);
 
   glGenVertexArrays(1, &vao);
   glGenBuffers(1, &vbo);
@@ -113,7 +113,6 @@ void create_vao() {
   glEnableVertexAttribArray(1);
   gl_error();
   puts("vao create success");
-  glBindVertexArray(ui_vao);
 
   constexpr u8 ascii[1520] = {
 #embed "ascii"
@@ -124,16 +123,25 @@ void create_vao() {
     for (u8 j = 0; j < 8; ++j)
       data[i][j] = -(ascii[i] >> j & 1);
 
-  u32 font;
-  glGenTextures(1, &font);
+  //glGenTextures(1, &ui);
+  //glActiveTexture(GL_TEXTURE0);
+  //glBindTexture(GL_TEXTURE_2D, ui);
+  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  //glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 8, 16 * 95, 0, GL_RED,
+  //             GL_UNSIGNED_BYTE, data);
+
+  gl_error();
+  puts("font texture generate success");
+
+  glGenTextures(1, &result);
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, font);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 8, 16 * 95, 0, GL_RED,
-               GL_UNSIGNED_BYTE, data);
+  glBindTexture(GL_TEXTURE_2D, result);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  puts("font texture generate success");
+  gl_error();
+  puts("result texture generate success");
 }
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   if (!SDL_Init(SDL_INIT_VIDEO))
@@ -154,6 +162,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   printf("Core Profile: using OpenGL %s\n", glGetString(GL_VERSION));
 
   // glEnable(GL_MULTISAMPLE);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   gl_error();
   create_shader();
   create_vao();
@@ -293,6 +303,12 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glReadPixels(0, 0, w, h, GL_RED, GL_UNSIGNED_BYTE, pixel);
   gl_error();
 
+  u8 *res = 0;
+  vec2 b = cv_pixel(pixel, &res, w, h);
+  printf("%f\t%f\n", a4p.z, (b.y - a4p.z) / a4p.z);
+  glBindTexture(GL_TEXTURE_2D, result);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, w, h, 0, GL_RED, GL_UNSIGNED_BYTE,
+               res);
   glUseProgram(ui_shader);
   glBindVertexArray(ui_vao);
   glBindBuffer(GL_ARRAY_BUFFER, ui_vbo);
@@ -305,8 +321,6 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
 
   SDL_GL_SwapWindow(window);
 
-  // vec2 b = cv_pixel(pixel, w, h);
-  //   printf("%f\t%f\n", a4p.z, (b.y - a4p.z) / a4p.z);
   return SDL_APP_CONTINUE;
 }
 

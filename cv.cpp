@@ -13,8 +13,8 @@ extern "C" void cv_init() {
 auto mid(auto a, auto b) { return (a + b) / 2; }
 extern f32 scale;
 extern vec4 view;
-extern "C" vec2 cv_pixel(u8 *pixel, u32 w, u32 h) {
-  Mat img(h, w, CV_8UC1, pixel);
+extern "C" vec2 cv_pixel(u8 *pixel,u8  **result, u32 w, u32 h) {
+  static Mat img(h, w, CV_8UC1, pixel);
   flip(img, img, 0);
   auto trans = [](vec4 p) {
     vec4 tmp = p - view;
@@ -24,6 +24,7 @@ extern "C" vec2 cv_pixel(u8 *pixel, u32 w, u32 h) {
     return (u64)((h - p.y) * .5) * w + (u64)((w + p.x) * .5);
   };
   u8 *p = img.data;
+  *result = p;
   constexpr u8 thr = 50;
   auto fied = [p, idx](vec2 p0, vec2 p1) {
     for (u8 i = 10; --i;) {
@@ -50,6 +51,7 @@ extern "C" vec2 cv_pixel(u8 *pixel, u32 w, u32 h) {
       break;
     }
   }
+  flip(img, img, 0);
   return view.y * scale / b0.y;
 }
 
