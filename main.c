@@ -8,7 +8,7 @@
 
 static SDL_Window *window;
 static SDL_Renderer *renderer;
-constexpr u32 w = 1600, h = 800;
+constexpr u32 w = 1600, h = 700;
 constexpr u64 N = 65536;
 
 #define gl_error()                                                             \
@@ -119,14 +119,14 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 
 static vec3 dir;
 static f32 yaw, pit, rol;
-static f32 scale = 2000;
+f32 scale = 2500;
 #define PI_2 1.57079632679489661922
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   switch (event->type) {
   case SDL_EVENT_QUIT:
     return SDL_APP_SUCCESS;
   case SDL_EVENT_MOUSE_MOTION:
-#define rspeed 2e-3
+#define rspeed 0e-3
     yaw -= event->motion.xrel * rspeed;
     pit += event->motion.yrel * rspeed;
     break;
@@ -191,30 +191,18 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   return SDL_APP_CONTINUE;
 }
 
-static vec4 view = {0, .25, 0, 1};
-static const f32 lw = 2.5e-3, speed = 3e-4;
-constexpr f32 er = 0x1p-15;
+vec4 view = {0, .25, 0, 1};
+static const f32 lw = 2.5e-3, speed = 1e-4;
+constexpr f32 er = 0x1p-14;
 static const vec4 a4 = {.210, .297};
-static const vec4 a4p = {-a4.x / 2, 0, -1, 1};
+static vec4 a4p = {-a4.x / 2, 0, -1, 1};
 static constexpr vec4 black = {0, 0, 0, 1};
 static constexpr vec4 white = {1, 1, 1, 1};
 static Vert obj[N] = {
-    {{-.25, 0, lw, 1}, black},
-    {{.25, 0, lw, 1}, black},
-    {{-.25, 0, -lw, 1}, black},
-    {{.25, 0, -lw, 1}, black},
-    {{-lw, 0, 0, 1}, black},
-    {{lw, 0, 0, 1}, black},
-    {{-lw, 0, -2.1, 1}, black},
-    {{lw, 0, -2.1, 1}, black},
-    {a4p, black},
-    {a4p + (vec4){a4.x}, black},
-    {a4p + (vec4){0, a4.y}, black},
-    {a4p + a4, black},
-    {a4p + (vec4){.02, .02, er}, white},
-    {a4p + (vec4){a4.x - .02, .02, er}, white},
-    {a4p + (vec4){.02, a4.y - .02, er}, white},
-    {a4p + a4 - (vec4){.02, .02, -er}, white},
+    {{-.25, 0, lw, 1}, black},  {{.25, 0, lw, 1}, black},
+    {{-.25, 0, -lw, 1}, black}, {{.25, 0, -lw, 1}, black},
+    {{-lw, 0, 0, 1}, black},    {{lw, 0, 0, 1}, black},
+    {{-lw, 0, -2.1, 1}, black}, {{lw, 0, -2.1, 1}, black},
 };
 static const u32 indx[24] = {0, 1, 2,  2,  1, 3,  4,  5,  6,  6,  5,  7,
                              8, 9, 10, 10, 9, 11, 12, 13, 14, 14, 13, 15};
@@ -226,10 +214,20 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glClearColor(.5, .5, .5, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  a4p.z += dir.z * speed;
+  obj[8] = (Vert){a4p, black};
+  obj[9] = (Vert){a4p + (vec4){a4.x}, black};
+  obj[10] = (Vert){a4p + (vec4){0, a4.y}, black};
+  obj[11] = (Vert){a4p + a4, black};
+  obj[12] = (Vert){a4p + (vec4){.02, .02, er}, white};
+  obj[13] = (Vert){a4p + (vec4){a4.x - .02, .02, er}, white};
+  obj[14] = (Vert){a4p + (vec4){.02, a4.y - .02, er}, white};
+  obj[15] = (Vert){a4p + a4 - (vec4){.02, .02, -er}, white};
   glUseProgram(shader);
   glUniform2f(0, scale / w, scale / h);
-  vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0, cos(yaw)}};
-  view += (roty[0] * dir.x + roty[1] * dir.y + roty[2] * dir.z) * speed;
+  // vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0,
+  // cos(yaw)}}; view += (roty[0] * dir.x + roty[1] * dir.y + roty[2] * dir.z) *
+  // speed;
   vec4 rot[4] = {{sin(yaw) * sin(pit) * sin(rol) + cos(yaw) * cos(rol),
                   -cos(pit) * sin(rol),
                   cos(yaw) * sin(pit) * sin(rol) - sin(yaw) * cos(rol), 0},
@@ -248,8 +246,8 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glReadPixels(0, 0, w, h, GL_RED, GL_UNSIGNED_BYTE, pixel);
   gl_error();
 
-  cv_pixel(pixel, w, h);
-//  printf("%f,%f,%f\n", view.x, view.y, view.z);
+  vec2 b = cv_pixel(pixel, w, h);
+  printf("%f\t%f\n", a4p.z, (b.y - a4p.z) / a4p.z);
   return SDL_APP_CONTINUE;
 }
 

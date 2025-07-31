@@ -11,9 +11,9 @@ extern "C" void cv_init() {
     return;
 }
 auto mid(auto a, auto b) { return (a + b) / 2; }
-extern "C" void cv_pixel(u8 *pixel, u32 w, u32 h) {
-  static f32 scale = 2000;
-  static vec4 view = {0, .25, 0, 1};
+extern f32 scale;
+extern vec4 view;
+extern "C" vec2 cv_pixel(u8 *pixel, u32 w, u32 h) {
   Mat img(h, w, CV_8UC1, pixel);
   flip(img, img, 0);
   auto trans = [](vec4 p) {
@@ -24,9 +24,9 @@ extern "C" void cv_pixel(u8 *pixel, u32 w, u32 h) {
     return (u64)((h - p.y) * .5) * w + (u64)((w + p.x) * .5);
   };
   u8 *p = img.data;
-  constexpr u8 thr = 200;
+  constexpr u8 thr = 50;
   auto fied = [p, idx](vec2 p0, vec2 p1) {
-    for (u8 i = 8; --i;) {
+    for (u8 i = 10; --i;) {
       vec2 m = mid(p0, p1);
       if (p[idx(m)] > thr)
         p0 = m;
@@ -40,15 +40,17 @@ extern "C" void cv_pixel(u8 *pixel, u32 w, u32 h) {
   vec4 axis0 = {-.05, 0, -1, 1};
   vec2 start = trans(axis0);
   vec2 end = trans(axis);
-  vec2 step = (end - start) / 64;
+  constexpr u32 n = 128;
+  vec2 step = (end - start) / n;
   vec2 b0;
-  for (u64 i = 0; i < 64; ++i) {
+  for (u64 i = 0; i < n; ++i) {
     vec2 p0 = start + step * i;
-    u8 val = p[idx(p0)];
-    if (val < thr)
+    if (p[idx(p0)] < thr) {
       b0 = fied(p0, p0 - step);
+      break;
+    }
   }
-  printf("%f\n",b0.y);
+  return view.y * scale / b0.y;
 }
 
 extern "C" void cv_run() {
