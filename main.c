@@ -132,6 +132,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
     break;
   case SDL_EVENT_MOUSE_WHEEL:
     scale += event->wheel.y * 50;
+    break;
   case SDL_EVENT_KEY_DOWN:
     if (event->key.repeat)
       break;
