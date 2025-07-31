@@ -1,4 +1,5 @@
 #include "cv.h"
+#include "def.h"
 #include <GLES3/gl32.h>
 #include <stdio.h>
 #define SDL_MAIN_USE_CALLBACKS 1
@@ -256,7 +257,7 @@ static Vert obj[N] = {
 };
 static vec4 font[N] = {
     {-1, -1, 0, 0}, {1, -1, 1, 0}, {-1, 1, 0, 1}, {1, 1, 1, 1}};
-static const u32 indx[24] = {0, 1, 2,  2,  1, 3,  4,  5,  6,  6,  5,  7,
+static u32 indx[N] = {0, 1, 2,  2,  1, 3,  4,  5,  6,  6,  5,  7,
                              8, 9, 10, 10, 9, 11, 12, 13, 14, 14, 13, 15};
 #define clk __builtin_readcyclecounter()
 #define sin __builtin_elementwise_sin
@@ -275,6 +276,22 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   obj[13] = (Vert){a4p + (vec4){a4.x - .02, .02, 0}, white};
   obj[14] = (Vert){a4p + (vec4){.02, a4.y - .02, 0}, white};
   obj[15] = (Vert){a4p + a4 - (vec4){.02, .02, 0}, white};
+  f32 l = .05, a = 1;
+  vec4 a0 = {l * cos(a), l * sin(a)};
+  vec4 a1 = {l * -sin(a), l * cos(a)};
+  vec4 o = a4p + .1;
+  obj[16] = (Vert){o, black};
+  obj[17] = (Vert){o + a0, black};
+  obj[18] = (Vert){o + a1, black};
+  obj[19] = (Vert){o + a0 + a1, black};
+
+  indx[24] = 16;
+  indx[25] = 17;
+  indx[26] = 18;
+  indx[27] = 18;
+  indx[28] = 17;
+  indx[29] = 19;
+
   // vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0,
   // cos(yaw)}}; view += (roty[0] * dir.x + roty[1] * dir.y + roty[2] * dir.z) *
   // speed;
@@ -296,7 +313,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glUniformMatrix4fv(2, 1, 0, (f32 *)rot);
   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(obj), obj);
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indx), indx);
-  glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES, 30, GL_UNSIGNED_INT, 0);
   glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pixel);
   gl_error();
 
