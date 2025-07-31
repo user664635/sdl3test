@@ -13,7 +13,7 @@ extern "C" void cv_init() {
 auto mid(auto a, auto b) { return (a + b) / 2; }
 extern f32 scale;
 extern vec4 view;
-extern "C" vec2 cv_pixel(u8 *pixel, u8 **result, u32 w, u32 h) {
+extern "C" vec2 cv_pixel(u8 *pixel, u8 **result) {
   static Mat img(h, w, CV_8UC3, pixel);
   flip(img, img, 0);
   auto trans = [](vec4 p) {
@@ -53,8 +53,8 @@ extern "C" vec2 cv_pixel(u8 *pixel, u8 **result, u32 w, u32 h) {
     return end;
   };
   vec2 b = (fiba(-.05) + fiba(.05)) / 2;
-  vec4 base = {0, 0, view.y * scale / b.y, 1};
   p[idx(b) + 1] = 255;
+  vec4 base = {0, 0, view.y * scale / b.y, 1};
 
   flip(img, img, 0);
   return base.z;

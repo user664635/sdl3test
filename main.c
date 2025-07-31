@@ -8,7 +8,6 @@
 
 static SDL_Window *window;
 static SDL_Renderer *renderer;
-constexpr u32 w = 1920, h = 1080;
 constexpr u64 N = 65536;
 
 #define gl_error()                                                             \
@@ -248,11 +247,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 }
 
 vec4 view = {0, .25, 0, 1};
-static const f32 lw = 2.5e-3, speed = 1e-3;
-static const vec4 a4 = {.210, .297};
 static vec4 a4p = {-a4.x / 2, 0, -1, 1};
-static constexpr vec4 black = {0, 0, 0, 1};
-static constexpr vec4 white = {1, 1, 1, 1};
 static Vert obj[N] = {
     {{-.25, 0, lw, 1}, black},  {{.25, 0, lw, 1}, black},
     {{-.25, 0, -lw, 1}, black}, {{.25, 0, -lw, 1}, black},
@@ -306,7 +301,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   gl_error();
 
   u8 *res = 0;
-  vec2 b = cv_pixel(pixel, &res, w, h);
+  vec2 b = cv_pixel(pixel, &res);
   printf("%f\t%f\n", a4p.z, (b.y - a4p.z) / a4p.z);
   glBindTexture(GL_TEXTURE_2D, result);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE,
