@@ -131,6 +131,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 
 static vec3 dir;
 static f32 yaw, pit, rol;
+#define PI_2 1.57079632679489661922
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   switch (event->type) {
   case SDL_EVENT_QUIT:
@@ -160,6 +161,12 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
       break;
     case 'c':
       --dir.y;
+      break;
+    case 'q':
+      rol += .1;
+      break;
+    case 'e':
+      rol -= .1;
       break;
     }
     break;
@@ -221,8 +228,12 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glUseProgram(shader);
   glUniform2f(0, scale / w, scale / h);
   vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0, cos(yaw)}};
-  vec4 rot[4] = {{cos(yaw), 0, -sin(yaw), 0},
-                 {-sin(yaw) * sin(pit), cos(pit), -cos(yaw) * sin(pit), 0},
+  vec4 rot[4] = {{sin(yaw) * sin(pit) * sin(rol) + cos(yaw) * cos(rol),
+                  -cos(pit) * sin(rol),
+                  cos(yaw) * sin(pit) * sin(rol) - sin(yaw) * cos(rol), 0},
+                 {cos(yaw) * sin(rol) - sin(yaw) * sin(pit) * cos(rol),
+                  cos(pit) * cos(rol),
+                  -cos(yaw) * sin(pit) * cos(rol) - sin(yaw) * sin(rol), 0},
                  {sin(yaw) * cos(pit), sin(pit), cos(yaw) * cos(pit), 0},
                  {0, 0, 0, 1}};
   view += (roty[0] * dir.x + roty[1] * dir.y + roty[2] * dir.z) * speed;
