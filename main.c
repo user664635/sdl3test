@@ -53,7 +53,7 @@ static u32 link(...) {
   return shader;
 }
 
-static u32 shader;
+static u32 shader,ui_shader;
 static void create_shader() {
   const char pos_vert_src[] = {
 #embed "pos.vert"
@@ -61,10 +61,19 @@ static void create_shader() {
   const char light_frag_src[] = {
 #embed "light.frag"
       , 0};
+  const char ui_vert_src[] = {
+#embed "ui.vert"
+      , 0};
+  const char ui_frag_src[] = {
+#embed "ui.frag"
+      , 0};
   gl_error();
   u32 pos_vert = compile(GL_VERTEX_SHADER, pos_vert_src);
   u32 light_frag = compile(GL_FRAGMENT_SHADER, light_frag_src);
+  u32 ui_vert = compile(GL_VERTEX_SHADER, ui_vert_src);
+  u32 ui_frag = compile(GL_FRAGMENT_SHADER, ui_frag_src);
   shader = link(2, pos_vert, light_frag);
+  ui_shader = link(2, ui_vert, ui_frag);
   gl_error();
 
   puts("shader create success");
@@ -285,7 +294,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glReadPixels(0, 0, w, h, GL_RED, GL_UNSIGNED_BYTE, pixel);
   gl_error();
 
-  vec2 b = cv_pixel(pixel, w, h);
+  //vec2 b = cv_pixel(pixel, w, h);
   //  printf("%f\t%f\n", a4p.z, (b.y - a4p.z) / a4p.z);
   return SDL_APP_CONTINUE;
 }
