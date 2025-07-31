@@ -26,28 +26,29 @@ extern "C" vec2 cv_pixel(u8 *pixel, u8 **result, u32 w, u32 h) {
   u8 *p = img.data;
   *result = p;
   constexpr u8 thr = 50;
-  auto fied = [p, idx](vec2 p0, vec2 p1) {
-    for (u8 i = 10; --i;) {
+  auto fied = [p, idx](u8 n, vec2 p0, vec2 p1) {
+    for (u8 i = n; --i;) {
       vec2 m = mid(p0, p1);
-      if (p[idx(m)] > thr)
+      if (p[idx(m)] < thr)
         p0 = m;
       else
         p1 = m;
     }
-    return mid(p0, p1);
+    p[idx(p0) + 1] = 255;
+    return p0;
   };
 
   vec4 axis = {-.05, 0, -2.1, 1};
   vec4 axis0 = {-.05, 0, -1, 1};
   vec2 start = trans(axis0);
   vec2 end = trans(axis);
-  constexpr u32 n = 128;
+  constexpr u32 n = 32;
   vec2 step = (end - start) / n;
-  vec2 b0;
+  vec2 b0 = end;
   for (u64 i = 0; i < n; ++i) {
     vec2 p0 = start + step * i;
     if (p[idx(p0)] < thr) {
-      b0 = fied(p0, p0 - step);
+      b0 = fied(4, p0, p0 - step);
       break;
     }
   }
