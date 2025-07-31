@@ -1,3 +1,4 @@
+#include "def.h"
 #include <opencv2/opencv.hpp>
 
 using namespace cv;
@@ -9,6 +10,7 @@ extern "C" void cv_init() {
   if (!cap.isOpened())
     return;
 }
+extern "C" void cv_pixel(u8 *pixel) {}
 extern "C" void cv_run() {
   Mat frame;
   if (esc)
@@ -16,7 +18,8 @@ extern "C" void cv_run() {
   bool success = cap.read(frame);
   if (!success || frame.empty())
     puts("empty");
+  namedWindow("test", WINDOW_AUTOSIZE);
   imshow("test", frame);
-  if (cv::waitKey(30) == '\xb')
+  if (cv::waitKey(1) == '\xb')
     esc = 1;
 }

@@ -1,4 +1,4 @@
-#version 460 core
+#version 310 es
 
 layout(location = 0) in highp vec3 pos_in;
 layout(location = 1) in highp vec4 color_in;

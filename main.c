@@ -1,3 +1,4 @@
+#include "def.h"
 #include <GLES3/gl32.h>
 #include <stdio.h>
 #define SDL_MAIN_USE_CALLBACKS 1
@@ -8,16 +9,6 @@
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 constexpr int w = 1600, h = 800;
-
-typedef float f32;
-typedef uint32_t u32;
-typedef uint64_t u64;
-typedef f32 [[clang::matrix_type(3, 3)]] mat3;
-typedef f32 [[clang::matrix_type(3, 1)]] mat3x1;
-typedef f32 [[clang::matrix_type(4, 4)]] mat4;
-typedef f32 [[clang::ext_vector_type(2)]] vec2;
-typedef f32 [[clang::ext_vector_type(3)]] vec3;
-typedef f32 [[clang::ext_vector_type(4)]] vec4;
 
 #define gl_error()                                                             \
   for (u32 gl_err; (gl_err = glGetError());)                                   \
@@ -220,6 +211,7 @@ static const u32 indx[] = {0, 1, 2, 2, 1, 3,  4,  5, 6,
 #define clk __builtin_readcyclecounter()
 #define sin __builtin_elementwise_sin
 #define cos __builtin_elementwise_cos
+static u8 pixel[w * h * 3];
 SDL_AppResult SDL_AppIterate(void *appstate) {
   glClearColor(.5, .5, .5, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -243,11 +235,12 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(obj), obj);
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indx), indx);
   glDrawElements(GL_TRIANGLES, sizeof(indx) / 4, GL_UNSIGNED_INT, 0);
-  gl_error();
   SDL_GL_SwapWindow(window);
+  glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+  gl_error();
 
   void cv_run();
-  // cv_run();
+  cv_run();
   return SDL_APP_CONTINUE;
 }
 
