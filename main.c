@@ -107,6 +107,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
                                        SDL_WINDOW_MOUSE_RELATIVE_MODE,
                                    &window, &renderer))
     return SDL_APP_FAILURE;
+  SDL_SetWindowRelativeMouseMode(window, 1);
   SDL_GL_CreateContext(window);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
@@ -135,8 +136,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   case SDL_EVENT_QUIT:
     return SDL_APP_SUCCESS;
   case SDL_EVENT_MOUSE_MOTION:
-    yaw -= event->motion.xrel * .01;
-    pit += event->motion.yrel * .01;
+    yaw -= event->motion.xrel * 1e-3;
+    pit += event->motion.yrel * 1e-3;
     break;
   case SDL_EVENT_KEY_DOWN:
     if (event->key.repeat)
@@ -191,7 +192,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 }
 
 static vec4 view;
-static const f32 lw = 2.5e-3, speed = 1e-3;
+static const f32 lw = 2.5e-3, speed = 1e-4;
 static const vec2 a4 = {.210, .297};
 static Vert obj[] = {
     {{-.25, 0, lw, 1}, {0, 0, 0, 1}},
@@ -216,14 +217,15 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glClearColor(.5, .5, .5, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  static f32 scale = 1000;
+  static f32 scale = 2000;
   glUseProgram(shader);
   glUniform2f(0, scale / w, scale / h);
-  vec4 rot[4] = {{cos(yaw), -sin(yaw) * sin(pit), -sin(yaw) * cos(pit), 0},
-                 {0, cos(pit), sin(pit), 0},
-                 {sin(yaw), -cos(yaw) * sin(pit), cos(yaw) * cos(pit), 0},
+  vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0, cos(yaw)}};
+  vec4 rot[4] = {{cos(yaw), 0, -sin(yaw), 0},
+                 {-sin(yaw) * sin(pit), cos(pit), -cos(yaw) * sin(pit), 0},
+                 {sin(yaw) * cos(pit), sin(pit), cos(yaw) * cos(pit), 0},
                  {0, 0, 0, 1}};
-  view += (rot[0] * dir.x + rot[1] * dir.y + rot[2] * dir.z) * speed;
+  view += (roty[0] * dir.x + roty[1] * dir.y + roty[2] * dir.z) * speed;
   glUniform3f(1, view.x, view.y, view.z);
   glUniformMatrix4fv(2, 1, 0, (f32 *)rot);
   glBindVertexArray(vao);
@@ -234,7 +236,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   SDL_GL_SwapWindow(window);
 
   void cv_run();
-  //cv_run();
+  // cv_run();
   return SDL_APP_CONTINUE;
 }
 
