@@ -1,4 +1,4 @@
-#include "def.h"
+#include "cv.h"
 #include <GLES3/gl32.h>
 #include <stdio.h>
 #define SDL_MAIN_USE_CALLBACKS 1
@@ -93,9 +93,8 @@ void create_vao() {
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   if (!SDL_Init(SDL_INIT_VIDEO))
     return SDL_APP_FAILURE;
-  if (!SDL_CreateWindowAndRenderer(
-          "test", w, h, SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY,
-          &window, &renderer))
+#define WFLAGS SDL_WINDOW_OPENGL //| SDL_WINDOW_HIGH_PIXEL_DENSITY
+  if (!SDL_CreateWindowAndRenderer("test", w, h, WFLAGS, &window, &renderer))
     return SDL_APP_FAILURE;
   SDL_SetWindowRelativeMouseMode(window, 1);
   SDL_GL_CreateContext(window);
@@ -114,7 +113,6 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   gl_error();
   create_shader();
   create_vao();
-  void cv_init();
   cv_init();
   return SDL_APP_CONTINUE;
 }
@@ -127,8 +125,9 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   case SDL_EVENT_QUIT:
     return SDL_APP_SUCCESS;
   case SDL_EVENT_MOUSE_MOTION:
-    yaw -= event->motion.xrel * 2e-3;
-    pit += event->motion.yrel * 2e-3;
+#define rspeed 0 //2e-3
+    yaw -= event->motion.xrel * rspeed;
+    pit += event->motion.yrel * rspeed;
     break;
   case SDL_EVENT_KEY_DOWN:
     if (event->key.repeat)
@@ -233,13 +232,11 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glBindVertexArray(vao);
   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(obj), obj);
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indx), indx);
-  glDrawElements(GL_TRIANGLES, sizeof(indx) / 4, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES,12 , GL_UNSIGNED_INT, 0);
   SDL_GL_SwapWindow(window);
   glReadPixels(0, 0, w, h, GL_RED, GL_UNSIGNED_BYTE, pixel);
   gl_error();
 
-  void cv_run();
-  void cv_pixel(u8 *, u32, u32);
   cv_pixel(pixel, w, h);
   return SDL_APP_CONTINUE;
 }
