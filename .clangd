@@ -1,2 +1,14 @@
 CompileFlags:
-  Add: [-std=gnu2y, -Wall, -fenable-matrix]
+  Add: [-Wall, -fenable-matrix, -I/usr/include/opencv4/]
+---
+If:
+  PathMatch: .*\.c
+CompileFlags:
+  Add: [-std=gnu2y]
+
+---
+If:
+  PathMatch: .*\.cpp
+CompileFlags:
+  Add: [-std=gnu++2c]
+

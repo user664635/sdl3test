@@ -123,6 +123,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   gl_error();
   create_shader();
   create_vao();
+  void cv_init();
+  cv_init();
   return SDL_APP_CONTINUE;
 }
 
@@ -134,7 +136,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
     return SDL_APP_SUCCESS;
   case SDL_EVENT_MOUSE_MOTION:
     yaw -= event->motion.xrel * .01;
-    pit -= event->motion.yrel * .01;
+    pit += event->motion.yrel * .01;
     break;
   case SDL_EVENT_KEY_DOWN:
     if (event->key.repeat)
@@ -217,12 +219,10 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   static f32 scale = 1000;
   glUseProgram(shader);
   glUniform2f(0, scale / w, scale / h);
-  vec4 rot[4] = {
-      {cos(yaw), 0, -sin(yaw), 0},
-      {0, 1, 0, 0},
-      {sin(yaw), 0, cos(yaw), 0},
-      {0, 0, 0, 1},
-  };
+  vec4 rot[4] = {{cos(yaw), -sin(yaw) * sin(pit), -sin(yaw) * cos(pit), 0},
+                 {0, cos(pit), sin(pit), 0},
+                 {sin(yaw), -cos(yaw) * sin(pit), cos(yaw) * cos(pit), 0},
+                 {0, 0, 0, 1}};
   view += (rot[0] * dir.x + rot[1] * dir.y + rot[2] * dir.z) * speed;
   glUniform3f(1, view.x, view.y, view.z);
   glUniformMatrix4fv(2, 1, 0, (f32 *)rot);
@@ -233,6 +233,8 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   gl_error();
   SDL_GL_SwapWindow(window);
 
+  void cv_run();
+  //cv_run();
   return SDL_APP_CONTINUE;
 }
 
