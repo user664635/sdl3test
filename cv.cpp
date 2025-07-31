@@ -16,10 +16,14 @@ extern "C" void cv_pixel(u8 *pixel, u32 w, u32 h) {
   Mat image(h, w, CV_8UC1, pixel);
   flip(image, image, 0);
   vec4 pos = {0, 0, -2.1, 1};
-  vec4 tmp = pos - view;
-  vec2 t = scale * tmp.xy / -tmp.z;
-  Point c(w / 2, h / 2);
-  circle(image, Point(t.x, -t.y / 2) + c, 50, Scalar(50), 10);
+  auto trans = [w, h](vec4 p) {
+    vec4 tmp = p - view;
+    vec2 t = scale * tmp.xy / -tmp.z * .5;
+    return Point(w / 2. + t.x, h / 2. - t.y);
+  };
+  auto cir = [image](Point p) { circle(image, p, 50, Scalar(50), 10); };
+  cir(trans(pos));
+  cir(trans(0));
   namedWindow("pixel", WINDOW_KEEPRATIO);
   imshow("pixel", image);
   waitKey(1);
