@@ -1,5 +1,4 @@
 #include "cv.h"
-#include "opencv2/highgui.hpp"
 #include <opencv2/opencv.hpp>
 
 using namespace cv;
@@ -19,17 +18,11 @@ extern "C" void cv_pixel(u8 *pixel, u32 w, u32 h) {
   auto trans = [w, h](vec4 p) {
     vec4 tmp = p - view;
     vec2 t = scale * tmp.xy / -tmp.z * .5;
-    return Point(w / 2. + t.x, h / 2. - t.y);
+    return vec2{w / 2.f + t.x, h / 2.f - t.y};
   };
-  u8 p0 = img.at<u8>(trans(pos));
+  vec2 t = trans(pos);
+  u8 p0 = img.data[(u32)t.y * w + (u32)t.x];
   printf("%d\n", p0);
-
-  auto cir = [img](Point p) { circle(img, p, 50, Scalar(200), 10); };
-  cir(trans(pos));
-  cir(trans(0));
-  namedWindow("pixel", WINDOW_KEEPRATIO);
-  imshow("pixel", img);
-  waitKey(1);
 }
 
 extern "C" void cv_run() {
@@ -37,7 +30,4 @@ extern "C" void cv_run() {
   bool success = cap.read(frame);
   if (!success || frame.empty())
     puts("empty");
-  namedWindow("test", WINDOW_AUTOSIZE);
-  imshow("test", frame);
-  waitKey(1);
 }
