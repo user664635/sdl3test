@@ -54,7 +54,6 @@ static u32 link(...) {
 }
 
 static u32 shader;
-static u32 vao;
 static void create_shader() {
   const char pos_vert_src[] = {
 #embed "pos.vert"
@@ -73,15 +72,33 @@ static void create_shader() {
 typedef struct {
   vec4 pos, color;
 } Vert;
+
+static u32 vao, vbo, ebo;
+static u32 ui_vao, ui_vbo, ui_ebo;
 void create_vao() {
-  u32 vbo, ebo;
+  glGenVertexArrays(1, &ui_vao);
+  glGenBuffers(1, &ui_vbo);
+  glGenBuffers(1, &ui_ebo);
+  glBindVertexArray(ui_vao);
+  glBindBuffer(GL_ARRAY_BUFFER, ui_vbo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ui_ebo);
+  glBufferData(GL_ARRAY_BUFFER, N * 32, 0, GL_DYNAMIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, N * 4, 0, GL_DYNAMIC_DRAW);
+  glVertexAttribPointer(0, 4, GL_FLOAT, 0, 32, 0);
+  glVertexAttribPointer(1, 4, GL_FLOAT, 0, 32, (void *)16);
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  gl_error();
+  puts("ui_vao create success");
+  glBindVertexArray(0);
+
   glGenVertexArrays(1, &vao);
   glGenBuffers(1, &vbo);
   glGenBuffers(1, &ebo);
   glBindVertexArray(vao);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-  glBufferData(GL_ARRAY_BUFFER, N * sizeof(Vert), 0, GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, N * 32, 0, GL_DYNAMIC_DRAW);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, N * 4, 0, GL_DYNAMIC_DRAW);
   glVertexAttribPointer(0, 4, GL_FLOAT, 0, 32, 0);
   glVertexAttribPointer(1, 4, GL_FLOAT, 0, 32, (void *)16);
@@ -89,6 +106,27 @@ void create_vao() {
   glEnableVertexAttribArray(1);
   gl_error();
   puts("vao create success");
+  glBindVertexArray(ui_vao);
+
+  constexpr u8 ascii[1520] = {
+#embed "ascii"
+  };
+  constexpr u32 len = sizeof(ascii);
+  u8 data[len][8];
+  for (u16 i = 0; i < len; ++i)
+    for (u8 j = 0; j < 8; ++j)
+      data[i][j] = -(ascii[i] >> j & 1);
+
+  u32 font;
+  glGenTextures(1, &font);
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, font);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 8, 16 * 95, 0, GL_RED,
+               GL_UNSIGNED_BYTE, data);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  puts("font texture generate success");
 }
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   if (!SDL_Init(SDL_INIT_VIDEO))
@@ -108,7 +146,6 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   printf("GL Vendor: %s\n", glGetString(GL_VENDOR));
   printf("Core Profile: using OpenGL %s\n", glGetString(GL_VERSION));
 
-  glEnable(GL_DEPTH_TEST);
   // glEnable(GL_MULTISAMPLE);
   gl_error();
   create_shader();
@@ -193,7 +230,6 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 
 vec4 view = {0, .25, 0, 1};
 static const f32 lw = 2.5e-3, speed = 1e-4;
-constexpr f32 er = 0x1p-14;
 static const vec4 a4 = {.210, .297};
 static vec4 a4p = {-a4.x / 2, 0, -1, 1};
 static constexpr vec4 black = {0, 0, 0, 1};
@@ -212,19 +248,17 @@ static const u32 indx[24] = {0, 1, 2,  2,  1, 3,  4,  5,  6,  6,  5,  7,
 static u8 pixel[w * h];
 SDL_AppResult SDL_AppIterate(void *appstate) {
   glClearColor(.5, .5, .5, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
 
   a4p.z += dir.z * speed;
   obj[8] = (Vert){a4p, black};
   obj[9] = (Vert){a4p + (vec4){a4.x}, black};
   obj[10] = (Vert){a4p + (vec4){0, a4.y}, black};
   obj[11] = (Vert){a4p + a4, black};
-  obj[12] = (Vert){a4p + (vec4){.02, .02, er}, white};
-  obj[13] = (Vert){a4p + (vec4){a4.x - .02, .02, er}, white};
-  obj[14] = (Vert){a4p + (vec4){.02, a4.y - .02, er}, white};
-  obj[15] = (Vert){a4p + a4 - (vec4){.02, .02, -er}, white};
-  glUseProgram(shader);
-  glUniform2f(0, scale / w, scale / h);
+  obj[12] = (Vert){a4p + (vec4){.02, .02, 0}, white};
+  obj[13] = (Vert){a4p + (vec4){a4.x - .02, .02, 0}, white};
+  obj[14] = (Vert){a4p + (vec4){.02, a4.y - .02, 0}, white};
+  obj[15] = (Vert){a4p + a4 - (vec4){.02, .02, 0}, white};
   // vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0,
   // cos(yaw)}}; view += (roty[0] * dir.x + roty[1] * dir.y + roty[2] * dir.z) *
   // speed;
@@ -236,9 +270,14 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
                   -cos(yaw) * sin(pit) * cos(rol) - sin(yaw) * sin(rol), 0},
                  {sin(yaw) * cos(pit), sin(pit), cos(yaw) * cos(pit), 0},
                  {0, 0, 0, 1}};
+
+  glUseProgram(shader);
+  glBindVertexArray(vao);
+  glBindBuffer(GL_ARRAY_BUFFER,vbo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,ebo);
+  glUniform2f(0, scale / w, scale / h);
   glUniform3f(1, view.x, view.y, view.z);
   glUniformMatrix4fv(2, 1, 0, (f32 *)rot);
-  glBindVertexArray(vao);
   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(obj), obj);
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indx), indx);
   glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0);
@@ -247,7 +286,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   gl_error();
 
   vec2 b = cv_pixel(pixel, w, h);
-  printf("%f\t%f\n", a4p.z, (b.y - a4p.z) / a4p.z);
+  //  printf("%f\t%f\n", a4p.z, (b.y - a4p.z) / a4p.z);
   return SDL_APP_CONTINUE;
 }
 

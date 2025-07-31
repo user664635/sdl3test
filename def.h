@@ -3,6 +3,7 @@
 
 typedef float f32;
 typedef uint8_t u8;
+typedef uint16_t u16;
 typedef uint32_t u32;
 typedef uint64_t u64;
 typedef f32 [[clang::matrix_type(3, 3)]] mat3;
