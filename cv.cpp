@@ -11,7 +11,7 @@ extern "C" void cv_init() {
     return;
 }
 extern "C" void cv_pixel(u8 *pixel, u32 w, u32 h) {
-  Mat image(h, w, CV_8UC3, pixel);
+  Mat image(h, w, CV_8U, pixel);
   flip(image, image, 0);
   imshow("pixel", image);
   waitKey(1);

@@ -93,10 +93,9 @@ void create_vao() {
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   if (!SDL_Init(SDL_INIT_VIDEO))
     return SDL_APP_FAILURE;
-  if (!SDL_CreateWindowAndRenderer("test", w, h,
-                                   SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS |
-                                       SDL_WINDOW_MOUSE_RELATIVE_MODE,
-                                   &window, &renderer))
+  if (!SDL_CreateWindowAndRenderer(
+          "test", w, h, SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY,
+          &window, &renderer))
     return SDL_APP_FAILURE;
   SDL_SetWindowRelativeMouseMode(window, 1);
   SDL_GL_CreateContext(window);
@@ -128,8 +127,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   case SDL_EVENT_QUIT:
     return SDL_APP_SUCCESS;
   case SDL_EVENT_MOUSE_MOTION:
-    yaw -= event->motion.xrel * 1e-3;
-    pit += event->motion.yrel * 1e-3;
+    yaw -= event->motion.xrel * 2e-3;
+    pit += event->motion.yrel * 2e-3;
     break;
   case SDL_EVENT_KEY_DOWN:
     if (event->key.repeat)
@@ -189,8 +188,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   return SDL_APP_CONTINUE;
 }
 
-static vec4 view;
-static const f32 lw = 2.5e-3, speed = 1e-4;
+static vec4 view = {0, .25, 0, 1};
+static const f32 lw = 2.5e-3, speed = 3e-4;
 static const vec2 a4 = {.210, .297};
 static Vert obj[] = {
     {{-.25, 0, lw, 1}, {0, 0, 0, 1}},
@@ -211,7 +210,7 @@ static const u32 indx[] = {0, 1, 2, 2, 1, 3,  4,  5, 6,
 #define clk __builtin_readcyclecounter()
 #define sin __builtin_elementwise_sin
 #define cos __builtin_elementwise_cos
-static u8 pixel[w * h * 3];
+static u8 pixel[w * h];
 SDL_AppResult SDL_AppIterate(void *appstate) {
   glClearColor(.5, .5, .5, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -220,6 +219,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glUseProgram(shader);
   glUniform2f(0, scale / w, scale / h);
   vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0, cos(yaw)}};
+  view += (roty[0] * dir.x + roty[1] * dir.y + roty[2] * dir.z) * speed;
   vec4 rot[4] = {{sin(yaw) * sin(pit) * sin(rol) + cos(yaw) * cos(rol),
                   -cos(pit) * sin(rol),
                   cos(yaw) * sin(pit) * sin(rol) - sin(yaw) * cos(rol), 0},
@@ -228,7 +228,6 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
                   -cos(yaw) * sin(pit) * cos(rol) - sin(yaw) * sin(rol), 0},
                  {sin(yaw) * cos(pit), sin(pit), cos(yaw) * cos(pit), 0},
                  {0, 0, 0, 1}};
-  view += (roty[0] * dir.x + roty[1] * dir.y + roty[2] * dir.z) * speed;
   glUniform3f(1, view.x, view.y, view.z);
   glUniformMatrix4fv(2, 1, 0, (f32 *)rot);
   glBindVertexArray(vao);
@@ -236,7 +235,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indx), indx);
   glDrawElements(GL_TRIANGLES, sizeof(indx) / 4, GL_UNSIGNED_INT, 0);
   SDL_GL_SwapWindow(window);
-  glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+  glReadPixels(0, 0, w, h, GL_RED, GL_UNSIGNED_BYTE, pixel);
   gl_error();
 
   void cv_run();

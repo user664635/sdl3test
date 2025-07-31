@@ -9,7 +9,7 @@ layout(location = 2) uniform highp mat4 rot;
 
 out highp vec4 color;
 void main() {
-  highp vec4 p = vec4(pos_in - view, 0);
+  highp vec4 p = vec4(pos_in - view, 1);
   p *= rot;
   gl_Position = vec4(p.xy * scale , -p.z - 1. / 64., -p.z);
   color = color_in;
