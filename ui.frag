@@ -1,14 +1,11 @@
 #version 310 es
 
-in highp vec4 c;
-in highp vec2 p;
-
+in highp vec2 cord;
 out highp vec4 color;
 
 layout(location = 0) uniform uint indx;
 layout(location = 1) uniform sampler2D tex[2];
-
 void main() {
-  color = c * texture(tex[indx], p);
+  color = texture(tex[indx], cord);
 }
 

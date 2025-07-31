@@ -1,11 +1,8 @@
 #version 310 es
+layout(location = 0) in highp vec4 attr;
 
-layout(location = 0) in highp vec4 attr_in;
-layout(location = 1) in highp vec4 cord_in;
-
-highp out vec4 attr;
-highp out vec4 cord;
+highp out vec2 cord;
 void main() {
-  attr = attr_in;
-  cord = cord_in;
+  gl_Position = vec4(attr.xy, -.1, 1);
+  cord = attr.zw;
 }

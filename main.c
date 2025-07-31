@@ -53,7 +53,7 @@ static u32 link(...) {
   return shader;
 }
 
-static u32 shader,ui_shader;
+static u32 shader, ui_shader;
 static void create_shader() {
   const char pos_vert_src[] = {
 #embed "pos.vert"
@@ -68,12 +68,12 @@ static void create_shader() {
 #embed "ui.frag"
       , 0};
   gl_error();
-  u32 pos_vert = compile(GL_VERTEX_SHADER, pos_vert_src);
-  u32 light_frag = compile(GL_FRAGMENT_SHADER, light_frag_src);
   u32 ui_vert = compile(GL_VERTEX_SHADER, ui_vert_src);
   u32 ui_frag = compile(GL_FRAGMENT_SHADER, ui_frag_src);
-  shader = link(2, pos_vert, light_frag);
+  u32 pos_vert = compile(GL_VERTEX_SHADER, pos_vert_src);
+  u32 light_frag = compile(GL_FRAGMENT_SHADER, light_frag_src);
   ui_shader = link(2, ui_vert, ui_frag);
+  shader = link(2, pos_vert, light_frag);
   gl_error();
 
   puts("shader create success");
@@ -91,12 +91,10 @@ void create_vao() {
   glBindVertexArray(ui_vao);
   glBindBuffer(GL_ARRAY_BUFFER, ui_vbo);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ui_ebo);
-  glBufferData(GL_ARRAY_BUFFER, N * 32, 0, GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, N * 16, 0, GL_DYNAMIC_DRAW);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, N * 4, 0, GL_DYNAMIC_DRAW);
-  glVertexAttribPointer(0, 4, GL_FLOAT, 0, 32, 0);
-  glVertexAttribPointer(1, 4, GL_FLOAT, 0, 32, (void *)16);
+  glVertexAttribPointer(0, 4, GL_FLOAT, 0, 16, 0);
   glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
   gl_error();
   puts("ui_vao create success");
   glBindVertexArray(0);
@@ -128,7 +126,7 @@ void create_vao() {
 
   u32 font;
   glGenTextures(1, &font);
-  glActiveTexture(GL_TEXTURE1);
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, font);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 8, 16 * 95, 0, GL_RED,
                GL_UNSIGNED_BYTE, data);
@@ -249,6 +247,8 @@ static Vert obj[N] = {
     {{-lw, 0, 0, 1}, black},    {{lw, 0, 0, 1}, black},
     {{-lw, 0, -2.1, 1}, black}, {{lw, 0, -2.1, 1}, black},
 };
+static vec4 font[N] = {
+    {-1, -1, 0, 0}, {1, -1, 1, 0}, {-1, 1, 0, 1}, {1, 1, 1, 1}};
 static const u32 indx[24] = {0, 1, 2,  2,  1, 3,  4,  5,  6,  6,  5,  7,
                              8, 9, 10, 10, 9, 11, 12, 13, 14, 14, 13, 15};
 #define clk __builtin_readcyclecounter()
@@ -282,20 +282,31 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
 
   glUseProgram(shader);
   glBindVertexArray(vao);
-  glBindBuffer(GL_ARRAY_BUFFER,vbo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,ebo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
   glUniform2f(0, scale / w, scale / h);
   glUniform3f(1, view.x, view.y, view.z);
   glUniformMatrix4fv(2, 1, 0, (f32 *)rot);
   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(obj), obj);
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indx), indx);
   glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0);
-  SDL_GL_SwapWindow(window);
   glReadPixels(0, 0, w, h, GL_RED, GL_UNSIGNED_BYTE, pixel);
   gl_error();
 
-  //vec2 b = cv_pixel(pixel, w, h);
-  //  printf("%f\t%f\n", a4p.z, (b.y - a4p.z) / a4p.z);
+  glUseProgram(ui_shader);
+  glBindVertexArray(ui_vao);
+  glBindBuffer(GL_ARRAY_BUFFER, ui_vbo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ui_ebo);
+  glUniform1ui(0, 0);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(font), font);
+  glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indx), indx);
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  gl_error();
+
+  SDL_GL_SwapWindow(window);
+
+  // vec2 b = cv_pixel(pixel, w, h);
+  //   printf("%f\t%f\n", a4p.z, (b.y - a4p.z) / a4p.z);
   return SDL_APP_CONTINUE;
 }
 
