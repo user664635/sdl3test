@@ -248,7 +248,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 }
 
 vec4 view = {0, .25, 0, 1};
-static const f32 lw = 2.5e-3, speed = 1e-4;
+static const f32 lw = 2.5e-3, speed = 1e-3;
 static const vec4 a4 = {.210, .297};
 static vec4 a4p = {-a4.x / 2, 0, -1, 1};
 static constexpr vec4 black = {0, 0, 0, 1};
