@@ -56,10 +56,19 @@ extern "C" vec2 cv_pixel(u8 *pixel, u8 **result) {
   p[idx(b) + 1] = 255;
   vec4 base = {0, 0, view.y * scale / b.y, 1};
   vec4 a40 = base + vec4{-a4.x / 2 + .025f, .0235f};
+  struct {
+    vec4 o;
+    vec2 g;
+    int v;
+  } grid[17][26];
   for (u32 i = 0; i < 17; ++i)
     for (u32 j = 0; j < 26; ++j) {
       vec4 p0 = a40 + vec4{i * .01f, j * .01f};
-      p[idx(trans(p0)) + 1] = 0;
+      grid[i][j] = {p0, trans(p0), -(p[idx(trans(p0)) > thr])};
+    }
+  for (u32 i = 0; i < 17; ++i)
+    for (u32 j = 0; j < 26; ++j) {
+      p[idx(grid[i][j].g) + 1] = grid[i][j].v;
     }
 
   flip(img, img, 0);

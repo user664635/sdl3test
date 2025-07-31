@@ -175,7 +175,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 
 static vec3 dir;
 static f32 yaw, pit, rol;
-f32 scale = 3000;
+f32 scale = 4000;
 #define PI_2 1.57079632679489661922
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   switch (event->type) {
