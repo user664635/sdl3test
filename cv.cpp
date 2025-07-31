@@ -13,15 +13,15 @@ extern "C" void cv_init() {
 auto mid(auto a, auto b) { return (a + b) / 2; }
 extern f32 scale;
 extern vec4 view;
-extern "C" vec2 cv_pixel(u8 *pixel,u8  **result, u32 w, u32 h) {
-  static Mat img(h, w, CV_8UC1, pixel);
+extern "C" vec2 cv_pixel(u8 *pixel, u8 **result, u32 w, u32 h) {
+  static Mat img(h, w, CV_8UC3, pixel);
   flip(img, img, 0);
   auto trans = [](vec4 p) {
     vec4 tmp = p - view;
     return scale * tmp.xy / -tmp.z;
   };
   auto idx = [w, h](vec2 p) {
-    return (u64)((h - p.y) * .5) * w + (u64)((w + p.x) * .5);
+    return ((u64)((h - p.y) * .5) * w + (u64)((w + p.x) * .5)) * 3;
   };
   u8 *p = img.data;
   *result = p;

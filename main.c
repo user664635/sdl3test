@@ -264,7 +264,7 @@ static const u32 indx[24] = {0, 1, 2,  2,  1, 3,  4,  5,  6,  6,  5,  7,
 #define clk __builtin_readcyclecounter()
 #define sin __builtin_elementwise_sin
 #define cos __builtin_elementwise_cos
-static u8 pixel[w * h];
+static u8 pixel[w * h * 3];
 SDL_AppResult SDL_AppIterate(void *appstate) {
   glClearColor(.5, .5, .5, 1);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -300,14 +300,14 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(obj), obj);
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indx), indx);
   glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0);
-  glReadPixels(0, 0, w, h, GL_RED, GL_UNSIGNED_BYTE, pixel);
+  glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pixel);
   gl_error();
 
   u8 *res = 0;
   vec2 b = cv_pixel(pixel, &res, w, h);
   printf("%f\t%f\n", a4p.z, (b.y - a4p.z) / a4p.z);
   glBindTexture(GL_TEXTURE_2D, result);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, w, h, 0, GL_RED, GL_UNSIGNED_BYTE,
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE,
                res);
   glUseProgram(ui_shader);
   glBindVertexArray(ui_vao);
