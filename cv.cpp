@@ -34,7 +34,7 @@ extern "C" vec2 cv_pixel(u8 *pixel, u8 **result) {
       else
         p1 = m;
     }
-    p[idx(p0) + 1] = 255;
+    p[idx(p0) + 2] = 255;
     return p0;
   };
 
@@ -55,6 +55,12 @@ extern "C" vec2 cv_pixel(u8 *pixel, u8 **result) {
   vec2 b = (fiba(-.05) + fiba(.05)) / 2;
   p[idx(b) + 1] = 255;
   vec4 base = {0, 0, view.y * scale / b.y, 1};
+  vec4 a40 = base + vec4{-a4.x / 2 + .025f, .0235f};
+  for (u32 i = 0; i < 17; ++i)
+    for (u32 j = 0; j < 26; ++j) {
+      vec4 p0 = a40 + vec4{i * .01f, j * .01f};
+      p[idx(trans(p0)) + 1] = 0;
+    }
 
   flip(img, img, 0);
   return base.z;
