@@ -119,6 +119,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 
 static vec3 dir;
 static f32 yaw, pit, rol;
+static f32 scale = 2000;
 #define PI_2 1.57079632679489661922
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   switch (event->type) {
@@ -129,6 +130,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
     yaw -= event->motion.xrel * rspeed;
     pit += event->motion.yrel * rspeed;
     break;
+  case SDL_EVENT_MOUSE_WHEEL:
+    scale += event->wheel.y * 50;
   case SDL_EVENT_KEY_DOWN:
     if (event->key.repeat)
       break;
@@ -189,7 +192,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 
 static vec4 view = {0, .25, 0, 1};
 static const f32 lw = 2.5e-3, speed = 3e-4;
-constexpr f32 er = 0x1p-16;
+constexpr f32 er = 0x1p-15;
 static const vec4 a4 = {.210, .297};
 static const vec4 a4p = {-a4.x / 2, 0, -1, 1};
 static constexpr vec4 black = {0, 0, 0, 1};
@@ -222,7 +225,6 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glClearColor(.5, .5, .5, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  static f32 scale = 2000;
   glUseProgram(shader);
   glUniform2f(0, scale / w, scale / h);
   vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0, cos(yaw)}};
