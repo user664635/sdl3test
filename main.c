@@ -9,6 +9,7 @@
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 constexpr u32 w = 1600, h = 800;
+constexpr u64 N = 65536;
 
 #define gl_error()                                                             \
   for (u32 gl_err; (gl_err = glGetError());)                                   \
@@ -80,7 +81,6 @@ void create_vao() {
   glBindVertexArray(vao);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-  constexpr u64 N = 65536;
   glBufferData(GL_ARRAY_BUFFER, N * sizeof(Vert), 0, GL_DYNAMIC_DRAW);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, N * 4, 0, GL_DYNAMIC_DRAW);
   glVertexAttribPointer(0, 4, GL_FLOAT, 0, 32, 0);
@@ -125,7 +125,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   case SDL_EVENT_QUIT:
     return SDL_APP_SUCCESS;
   case SDL_EVENT_MOUSE_MOTION:
-#define rspeed 0 //2e-3
+#define rspeed 2e-3
     yaw -= event->motion.xrel * rspeed;
     pit += event->motion.yrel * rspeed;
     break;
@@ -189,23 +189,31 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 
 static vec4 view = {0, .25, 0, 1};
 static const f32 lw = 2.5e-3, speed = 3e-4;
-static const vec2 a4 = {.210, .297};
-static Vert obj[] = {
-    {{-.25, 0, lw, 1}, {0, 0, 0, 1}},
-    {{.25, 0, lw, 1}, {0, 0, 0, 1}},
-    {{-.25, 0, -lw, 1}, {0, 0, 0, 1}},
-    {{.25, 0, -lw, 1}, {0, 0, 0, 1}},
-    {{-lw, 0, 0, 1}, {0, 0, 0, 1}},
-    {{lw, 0, 0, 1}, {0, 0, 0, 1}},
-    {{-lw, 0, -2.1, 1}, {0, 0, 0, 1}},
-    {{lw, 0, -2.1, 1}, {0, 0, 0, 1}},
-    {{-a4.x / 2, 0, -1, 1}, {1, 1, 1, 1}},
-    {{a4.x / 2, 0, -1, 1}, {1, 1, 1, 1}},
-    {{-a4.x / 2, a4.y, -1, 1}, {1, 1, 1, 1}},
-    {{a4.x / 2, a4.y, -1, 1}, {1, 1, 1, 1}},
+constexpr f32 er = 0x1p-16;
+static const vec4 a4 = {.210, .297};
+static const vec4 a4p = {-a4.x / 2, 0, -1, 1};
+static constexpr vec4 black = {0, 0, 0, 1};
+static constexpr vec4 white = {1, 1, 1, 1};
+static Vert obj[N] = {
+    {{-.25, 0, lw, 1}, black},
+    {{.25, 0, lw, 1}, black},
+    {{-.25, 0, -lw, 1}, black},
+    {{.25, 0, -lw, 1}, black},
+    {{-lw, 0, 0, 1}, black},
+    {{lw, 0, 0, 1}, black},
+    {{-lw, 0, -2.1, 1}, black},
+    {{lw, 0, -2.1, 1}, black},
+    {a4p, black},
+    {a4p + (vec4){a4.x}, black},
+    {a4p + (vec4){0, a4.y}, black},
+    {a4p + a4, black},
+    {a4p + (vec4){.02, .02, er}, white},
+    {a4p + (vec4){a4.x - .02, .02, er}, white},
+    {a4p + (vec4){.02, a4.y - .02, er}, white},
+    {a4p + a4 - (vec4){.02, .02, -er}, white},
 };
-static const u32 indx[] = {0, 1, 2, 2, 1, 3,  4,  5, 6,
-                           6, 5, 7, 8, 9, 10, 10, 9, 11};
+static const u32 indx[24] = {0, 1, 2,  2,  1, 3,  4,  5,  6,  6,  5,  7,
+                             8, 9, 10, 10, 9, 11, 12, 13, 14, 14, 13, 15};
 #define clk __builtin_readcyclecounter()
 #define sin __builtin_elementwise_sin
 #define cos __builtin_elementwise_cos
@@ -232,12 +240,13 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glBindVertexArray(vao);
   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(obj), obj);
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indx), indx);
-  glDrawElements(GL_TRIANGLES,12 , GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0);
   SDL_GL_SwapWindow(window);
   glReadPixels(0, 0, w, h, GL_RED, GL_UNSIGNED_BYTE, pixel);
   gl_error();
 
   cv_pixel(pixel, w, h);
+  printf("%f,%f,%f\n", view.x, view.y, view.z);
   return SDL_APP_CONTINUE;
 }
 
