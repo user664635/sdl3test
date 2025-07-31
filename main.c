@@ -249,7 +249,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   gl_error();
 
   cv_pixel(pixel, w, h);
-  printf("%f,%f,%f\n", view.x, view.y, view.z);
+//  printf("%f,%f,%f\n", view.x, view.y, view.z);
   return SDL_APP_CONTINUE;
 }
 
