@@ -6,7 +6,7 @@ using namespace cv;
 
 VideoCapture cap;
 extern "C" void cv_init() {
-  cap = VideoCapture(0, CAP_V4L2);
+  cap = VideoCapture(2, CAP_V4L2);
   if (!cap.isOpened())
     return;
   cap.set(CAP_PROP_FRAME_WIDTH, 1920);
