@@ -26,6 +26,14 @@ extern "C" vec2 cv_pixel(u8 *pixel, u8 **result) {
   u8 *p = img.data;
   *result = p;
   constexpr u8 thr = 50;
+  auto light = [&](u64 i) {
+    p[i - w * 3 + 1] = -1;
+    p[i - w * 3 + 2] = 0;
+    p[i + 1] = 0;
+    p[i + 2] = -1;
+    p[i + w * 3 + 1] = -1;
+    p[i + w * 3 + 2] = 0;
+  };
   auto fied = [&](u8 n, vec2 p0, vec2 p1) {
     for (u8 i = n; --i;) {
       vec2 m = mid(p0, p1);
@@ -34,7 +42,7 @@ extern "C" vec2 cv_pixel(u8 *pixel, u8 **result) {
       else
         p1 = m;
     }
-    p[idx(p0) + 2] = 255;
+    light(idx(p0));
     return p0;
   };
 
@@ -53,7 +61,7 @@ extern "C" vec2 cv_pixel(u8 *pixel, u8 **result) {
     return end;
   };
   vec2 b = (fiba(-.05) + fiba(.05)) / 2;
-  p[idx(b) + 1] = 255;
+  light(idx(b));
   vec4 base = {0, 0, view.y * scale / b.y, 1};
   vec4 a40 = base + vec4{-a4.x / 2 + .025f, .0235f};
   struct {
@@ -64,12 +72,32 @@ extern "C" vec2 cv_pixel(u8 *pixel, u8 **result) {
   for (u32 i = 0; i < 17; ++i)
     for (u32 j = 0; j < 26; ++j) {
       vec4 p0 = a40 + vec4{i * .01f, j * .01f};
-      grid[i][j] = {p0, trans(p0), -(p[idx(trans(p0)) > thr])};
+      grid[i][j] = {p0, trans(p0), p[idx(trans(p0))] < thr};
     }
-  for (u32 i = 0; i < 17; ++i)
+  f32 line[34];
+  u32 cnt = 0;
+  for (u32 i = 0; i < 17; ++i) {
+    int prev = 0;
     for (u32 j = 0; j < 26; ++j) {
-      p[idx(grid[i][j].g) + 1] = grid[i][j].v;
+      if (!prev && grid[i][j].v)
+        line[cnt++] = fied(4, grid[i][j].g, grid[i][j - 1].g).y;
+      if (prev && !grid[i][j].v)
+        line[cnt++] = fied(4, grid[i][j - 1].g, grid[i][j].g).y;
+      prev = grid[i][j].v;
     }
+  }
+  f32 prey = 0;
+  f32 ys[4];
+  f32 y0s[4];
+  u32 c = 0;
+  for (u32 i = 2; i < cnt; i += 2) {
+    f32 y = line[i] - line[i - 2];
+    f32 dy = y - prey;
+    if (dy * dy > 5)
+      ys[c] = prey, y0s[c++] = line[i - 2];
+    prey = y;
+  }
+  printf("%f,%f\t",ys[0],ys[1]);
 
   flip(img, img, 0);
   return base.z;

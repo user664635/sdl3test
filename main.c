@@ -276,7 +276,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   obj[13] = (Vert){a4p + (vec4){a4.x - .02, .02, 0}, white};
   obj[14] = (Vert){a4p + (vec4){.02, a4.y - .02, 0}, white};
   obj[15] = (Vert){a4p + a4 - (vec4){.02, .02, 0}, white};
-  f32 l = .05, a = 1;
+  f32 l = .07, a = 1;
   vec4 a0 = {l * cos(a), l * sin(a)};
   vec4 a1 = {l * -sin(a), l * cos(a)};
   vec4 o = a4p + .1;
