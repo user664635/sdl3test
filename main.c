@@ -258,7 +258,7 @@ static Vert obj[N] = {
 static vec4 font[N] = {
     {-1, -1, 0, 0}, {1, -1, 1, 0}, {-1, 1, 0, 1}, {1, 1, 1, 1}};
 static u32 indx[N] = {0, 1, 2,  2,  1, 3,  4,  5,  6,  6,  5,  7,
-                             8, 9, 10, 10, 9, 11, 12, 13, 14, 14, 13, 15};
+                      8, 9, 10, 10, 9, 11, 12, 13, 14, 14, 13, 15};
 #define clk __builtin_readcyclecounter()
 #define sin __builtin_elementwise_sin
 #define cos __builtin_elementwise_cos
@@ -317,9 +317,10 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pixel);
   gl_error();
 
-  u8 *res = 0;
-  vec2 b = cv_pixel(pixel, &res);
-  printf("%f\t%f\t%f\n", a4p.z, b.x - a4p.z,b.y);
+  extern u8 *res;
+  extern f32 d,x;
+  cv_pixel(pixel);
+  printf("%f\t%f\t%f\n", a4p.z, d, x);
   glBindTexture(GL_TEXTURE_2D, result);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE,
                res);
