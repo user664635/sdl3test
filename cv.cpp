@@ -102,20 +102,22 @@ void process(u8 *p) {
         y[c++] = fied(4, grid[i][j - 1].g, grid[i][j].g);
       prev = grid[i][j].v;
     }
-    // for (u32 j = 0; j < c; j += 2) {
-    //   if (!prec)
-    //     pos[0][0] = fipo(4, (y[j] + y[j + 1]) / 2, vec2{-16, 0});
-    //   vec2 dy = y[j] - prey[j];
-    //   if (predy[j].y < dy.y)
-    //     pos[0][1] = fipo(4, (y[j] + prey[j]) / 2, vec2{0, -16});
-    //   prey[j] = y[j];
-    //   predy[j] = dy;
-    //   dy = y[j + 1] - prey[j + 1];
-    //   if (predy[j + 1].y > dy.y)
-    //     pos[0][2] = fipo(4, (y[j + 1] + prey[j + 1]) / 2, vec2{0, 16});
-    //   prey[j + 1] = y[j + 1];
-    //   predy[j + 1] = dy;
-    // }
+    for (u32 j = 0; j < c; j += 2) {
+      if (!prec)
+        printf("%d,%d\t", i, j),
+            pos[0][0] = fipo(4, (y[j] + y[j + 1]) / 2, vec2{-16, 0});
+      vec2 dy = y[j] - prey[j];
+      if (predy[j].y < dy.y)
+        printf("%d,%d,%f\t", i, j,predy[j].y),
+            pos[0][1] = fipo(4, (y[j] + prey[j]) / 2, vec2{0, -16});
+      prey[j] = y[j];
+      predy[j] = dy;
+      dy = y[j + 1] - prey[j + 1];
+      if (predy[j + 1].y > dy.y)
+        pos[0][2] = fipo(4, (y[j + 1] + prey[j + 1]) / 2, vec2{0, 16});
+      prey[j + 1] = y[j + 1];
+      predy[j + 1] = dy;
+    }
     prec = c;
   }
   // f32 l = length(pos[0][1] - pos[0][0]) * -base.z / scale;
