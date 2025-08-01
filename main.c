@@ -10,6 +10,7 @@
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 constexpr u64 N = 65536;
+constexpr u32 w = 1920, h = 1080;
 
 #define gl_error()                                                             \
   for (u32 gl_err; (gl_err = glGetError());)                                   \
@@ -144,6 +145,7 @@ void create_vao() {
   puts("result texture generate success");
 }
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
+  cv_init();
   if (!SDL_Init(SDL_INIT_VIDEO))
     return SDL_APP_FAILURE;
 #define WFLAGS SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY
@@ -169,13 +171,12 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   gl_error();
   create_shader();
   create_vao();
-  cv_init();
   return SDL_APP_CONTINUE;
 }
 
 static vec3 dir;
 static f32 yaw, pit, rol;
-f32 scale = 4000;
+f32 scale = 3400;
 #define PI_2 1.57079632679489661922
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   switch (event->type) {
@@ -248,7 +249,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 }
 
 vec4 view = {0, .25, 0, 1};
-static vec4 a4p = {-a4.x / 2, 0, -1, 1};
+static vec4 a4p = {-a4.x / 2, 0, -2, 1};
 static Vert obj[N] = {
     {{-.25, 0, lw, 1}, black},  {{.25, 0, lw, 1}, black},
     {{-.25, 0, -lw, 1}, black}, {{.25, 0, -lw, 1}, black},
@@ -258,7 +259,7 @@ static Vert obj[N] = {
 static vec4 font[N] = {
     {-1, -1, 0, 0}, {1, -1, 1, 0}, {-1, 1, 0, 1}, {1, 1, 1, 1}};
 static u32 indx[N] = {0, 1, 2,  2,  1, 3,  4,  5,  6,  6,  5,  7,
-                             8, 9, 10, 10, 9, 11, 12, 13, 14, 14, 13, 15};
+                      8, 9, 10, 10, 9, 11, 12, 13, 14, 14, 13, 15};
 #define clk __builtin_readcyclecounter()
 #define sin __builtin_elementwise_sin
 #define cos __builtin_elementwise_cos
@@ -318,10 +319,11 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   gl_error();
 
   u8 *res = 0;
+  extern u32 cam_w, cam_h;
   vec2 b = cv_pixel(pixel, &res);
-  printf("%f\t%f\t%f\n", a4p.z, b.x - a4p.z,b.y);
+  printf("%f\t%f\t%f\t%f\n", a4p.z, b.x, b.y,scale);
   glBindTexture(GL_TEXTURE_2D, result);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE,
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cam_w, cam_h, 0, GL_RGB, GL_UNSIGNED_BYTE,
                res);
   glUseProgram(ui_shader);
   glBindVertexArray(ui_vao);

@@ -13,8 +13,7 @@ typedef f32 [[clang::ext_vector_type(2)]] vec2;
 typedef f32 [[clang::ext_vector_type(3)]] vec3;
 typedef f32 [[clang::ext_vector_type(4)]] vec4;
 
-constexpr u32 w = 1920, h = 1080;
 static constexpr vec4 black = {0, 0, 0, 1};
 static constexpr vec4 white = {1, 1, 1, 1};
-static const f32 lw = 2.5e-3, speed = 1e-3;
+static const f32 lw = 2.5e-3, speed = 1e-1;
 static const vec4 a4 = {.210, .297};
