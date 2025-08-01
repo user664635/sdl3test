@@ -11,6 +11,8 @@ extern "C" void cv_init() {
     return;
 }
 auto mid(auto a, auto b) { return (a + b) / 2; }
+auto dot(vec2 a, vec2 b) { return a.x * b.x + a.y * b.y; }
+auto length(vec2 a) { return __builtin_elementwise_sqrt(dot(a, a)); }
 extern f32 scale;
 extern vec4 view;
 extern "C" vec2 cv_pixel(u8 *pixel, u8 **result) {
@@ -35,7 +37,7 @@ extern "C" vec2 cv_pixel(u8 *pixel, u8 **result) {
     p[i + w * 3 + 2] = 0;
   };
   auto fied = [&](u8 n, vec2 p0, vec2 p1) {
-    for (u8 i = n; --i;) {
+    while (--n) {
       vec2 m = mid(p0, p1);
       if (p[idx(m)] < thr)
         p0 = m;
@@ -44,6 +46,16 @@ extern "C" vec2 cv_pixel(u8 *pixel, u8 **result) {
     }
     light(idx(p0));
     return p0;
+  };
+  auto fipo = [&](u8 n, vec2 m, vec2 d) {
+    vec2 rd = {d.y, -d.x};
+    while (--n) {
+      vec2 t = fied(4, m, m + d);
+      bool dir = p[idx(t + rd / 32)] > thr;
+      vec2 t1 = fied(4, t, t + (dir ? rd : -rd));
+      m = (t + t1) / 2;
+    }
+    return m;
   };
 
   auto fiba = [&](f32 x) {
@@ -74,38 +86,47 @@ extern "C" vec2 cv_pixel(u8 *pixel, u8 **result) {
       vec4 p0 = a40 + vec4{i * .01f, j * .01f};
       grid[i][j] = {p0, trans(p0), p[idx(trans(p0))] < thr};
     }
-  f32 line[34];
-  u32 cnt = 0;
+
+  u32 prec = 0;
+  vec2 prey0 = 0;
+  vec2 predy0 = 0;
+  vec2 prey1 = 0;
+  vec2 pos[4];
   for (u32 i = 0; i < 17; ++i) {
     int prev = 0;
+    vec2 y0 = 0, y1 = 0;
+    u32 c = 0;
     for (u32 j = 0; j < 26; ++j) {
       if (!prev && grid[i][j].v)
-        line[cnt++] = fied(4, grid[i][j].g, grid[i][j - 1].g).y;
+        y0 = fied(4, grid[i][j].g, grid[i][j - 1].g), ++c;
       if (prev && !grid[i][j].v)
-        line[cnt++] = fied(4, grid[i][j - 1].g, grid[i][j].g).y;
+        y1 = fied(4, grid[i][j - 1].g, grid[i][j].g), ++c;
       prev = grid[i][j].v;
     }
+    if (c) {
+      if (!prec)
+        pos[0] = fipo(4, (y0 + y1) / 2, vec2{-32, 0});
+      vec2 dy0 = y0 - prey0;
+      if (predy0.y > dy0.y) {
+        pos[1] = fipo(4, (y0 + prey0) / 2, vec2{0, 16});
+        break;
+      }
+
+      prey0 = y0;
+      predy0 = dy0;
+      prey1 = y1;
+    }
+    prec = c;
   }
-  f32 prey = 0;
-  f32 ys[4];
-  f32 y0s[4];
-  u32 c = 0;
-  for (u32 i = 2; i < cnt; i += 2) {
-    f32 y = line[i] - line[i - 2];
-    f32 dy = y - prey;
-    if (dy * dy > 5)
-      ys[c] = prey, y0s[c++] = line[i - 2];
-    prey = y;
-  }
-  printf("%f,%f\t",ys[0],ys[1]);
+  f32 l = length(pos[1] - pos[0]) * base.z / scale;
 
   flip(img, img, 0);
-  return base.z;
+  return {base.z, l};
 }
 
 extern "C" void cv_run() {
   Mat frame;
   bool success = cap.read(frame);
   if (!success || frame.empty())
-    puts("empty");
+    ;
 }

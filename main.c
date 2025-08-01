@@ -319,7 +319,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
 
   u8 *res = 0;
   vec2 b = cv_pixel(pixel, &res);
-  printf("%f\t%f\n", a4p.z, b.y - a4p.z);
+  printf("%f\t%f\t%f\n", a4p.z, b.x - a4p.z,b.y);
   glBindTexture(GL_TEXTURE_2D, result);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE,
                res);
