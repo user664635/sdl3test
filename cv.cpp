@@ -88,37 +88,39 @@ extern "C" vec2 cv_pixel(u8 *pixel, u8 **result) {
     }
 
   u32 prec = 0;
-  vec2 prey0 = 0;
-  vec2 predy0 = 0;
-  vec2 prey1 = 0;
-  vec2 pos[4];
+  vec2 prey[8];
+  vec2 predy[8];
+  vec2 pos[4][4];
   for (u32 i = 0; i < 17; ++i) {
     int prev = 0;
-    vec2 y0 = 0, y1 = 0;
     u32 c = 0;
+    vec2 y[8];
     for (u32 j = 0; j < 26; ++j) {
       if (!prev && grid[i][j].v)
-        y0 = fied(4, grid[i][j].g, grid[i][j - 1].g), ++c;
+        y[c++] = fied(4, grid[i][j].g, grid[i][j - 1].g);
       if (prev && !grid[i][j].v)
-        y1 = fied(4, grid[i][j - 1].g, grid[i][j].g), ++c;
+        y[c++] = fied(4, grid[i][j - 1].g, grid[i][j].g);
       prev = grid[i][j].v;
     }
-    if (c) {
+    for (u32 j = 0; j < c; j += 2) {
       if (!prec)
-        pos[0] = fipo(4, (y0 + y1) / 2, vec2{-32, 0});
-      vec2 dy0 = y0 - prey0;
-      if (predy0.y > dy0.y) {
-        pos[1] = fipo(4, (y0 + prey0) / 2, vec2{0, 16});
-        break;
-      }
-
-      prey0 = y0;
-      predy0 = dy0;
-      prey1 = y1;
+        pos[0][0] = fipo(4, (y[j] + y[j + 1]) / 2, vec2{-16, 0});
+      vec2 dy = y[j] - prey[j];
+      if (predy[j].y < dy.y)
+        pos[0][1] = fipo(4, (y[j] + prey[j]) / 2, vec2{0, -16});
+      prey[j] = y[j];
+      predy[j] = dy;
+      dy = y[j + 1] - prey[j + 1];
+      if (predy[j + 1].y > dy.y)
+        pos[0][2] = fipo(4, (y[j + 1] + prey[j + 1]) / 2, vec2{0, 16});
+      prey[j + 1] = y[j + 1];
+      predy[j + 1] = dy;
     }
     prec = c;
   }
-  f32 l = length(pos[1] - pos[0]) * base.z / scale;
+  puts("!");
+  puts("!");
+  f32 l = length(pos[0][1] - pos[0][0]) * -base.z / scale;
 
   flip(img, img, 0);
   return {base.z, l};
