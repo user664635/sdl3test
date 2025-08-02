@@ -256,20 +256,21 @@ static Vert obj[N] = {
 };
 static vec4 font[N] = {
     {-1, -1, 0, 0}, {1, -1, 1, 0}, {-1, 1, 0, 1}, {1, 1, 1, 1}};
-static u32 indx[N] = {0, 1, 2, 2, 1, 3, 4, 5, 6, 6, 5, 7};
+static u32 indx[N] = {0, 1, 2,  2,  1, 3,  4,  5,  6,  6,  5,  7,
+                      8, 9, 10, 10, 9, 11, 12, 13, 14, 14, 13, 15};
 #define clk __builtin_readcyclecounter()
 #define sin __builtin_elementwise_sin
 #define cos __builtin_elementwise_cos
 static u8 pixel[w * h * 3];
 static u32 ocnt, icnt;
-static void addrect(vec4 o, vec2 l, f32 a) {
+static void addrect(vec4 o, vec2 l, f32 a, vec4 c) {
   vec4 a0 = {l.x * cos(a), l.y * sin(a)};
   vec4 a1 = {l.x * -sin(a), l.y * cos(a)};
   o += a4p;
-  obj[ocnt] = (Vert){o, black};
-  obj[ocnt + 1] = (Vert){o + a0, black};
-  obj[ocnt + 2] = (Vert){o + a1, black};
-  obj[ocnt + 3] = (Vert){o + a0 + a1, black};
+  obj[ocnt] = (Vert){o, c};
+  obj[ocnt + 1] = (Vert){o + a0, c};
+  obj[ocnt + 2] = (Vert){o + a1, c};
+  obj[ocnt + 3] = (Vert){o + a0 + a1, c};
 
   indx[icnt] = ocnt;
   indx[icnt + 1] = ocnt + 1;
@@ -287,18 +288,11 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   a4p.z += dir.z * speed;
   ocnt = 8;
   icnt = 12;
-  addrect(a4p, a4.xy, 0);
-  obj[8] = (Vert){a4p, black};
-  obj[9] = (Vert){a4p + (vec4){a4.x}, black};
-  obj[10] = (Vert){a4p + (vec4){0, a4.y}, black};
-  obj[11] = (Vert){a4p + a4, black};
-  obj[12] = (Vert){a4p + (vec4){.02, .02, 0}, white};
-  obj[13] = (Vert){a4p + (vec4){a4.x - .02, .02, 0}, white};
-  obj[14] = (Vert){a4p + (vec4){.02, a4.y - .02, 0}, white};
-  obj[15] = (Vert){a4p + a4 - (vec4){.02, .02, 0}, white};
-  addrect((vec4){.03, .1}, 0.07, -.2);
-  addrect((vec4){.13, .1}, 0.09, .5);
-  addrect((vec4){.1, .08}, 0.06, .1);
+  addrect(0, a4.xy, 0, black);
+  addrect((vec4){.02, .02}, a4.xy - .04, 0, white);
+  addrect((vec4){.03, .1}, 0.07, -.2, black);
+  addrect((vec4){.13, .1}, 0.09, .5, black);
+  addrect((vec4){.1, .08}, 0.06, .1, black);
 
   // vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0,
   // cos(yaw)}}; view += (roty[0] * dir.x + roty[1] * dir.y + roty[2] * dir.z) *

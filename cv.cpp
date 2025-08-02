@@ -28,7 +28,6 @@ auto idx(vec2 p) {
 u8 *res;
 f32 d, x;
 void process(u8 *p) {
-  res = p;
   constexpr u8 thr = 50;
   auto light = [&](u64 i) {
     p[i - w * 3 + 1] = -1;
@@ -111,7 +110,8 @@ void process(u8 *p) {
 extern "C" void cv_pixel(u8 *pixel) {
   static Mat img(h, w, CV_8UC3, pixel);
   flip(img, img, 0);
-  process(img.data);
+  res = img.data;
+  //process(img.data);
 
   flip(img, img, 0);
 }
