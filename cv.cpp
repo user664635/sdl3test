@@ -81,7 +81,7 @@ void process(u8 *p) {
       vec2 p0 = {(i - 8) * .01f, (j - 13) * .01f};
       vec2 tp0 = page(p0);
       u32 id = idx(tp0);
-      //light(id);
+      // light(id);
       grid[i][j] = {p0, tp0, p[id] < thr};
     }
 
@@ -123,8 +123,8 @@ void process(u8 *p) {
         goto cont;
       }
       if (abs(pdy[j] - dy0) > 20)
-        printf("%d,%d\t", i, ij[j]),
-            prim[0][primc++] = fipo(4, grid[i][ij[j]].p, vec2{-.01, -.01});
+        printf("%d,%d\t", i, ij[j]);
+      // prim[0][primc++] = fipo(4, grid[i][ij[j]].p, vec2{-.01, -.01});
       if (abs(pdy[j + 1] - dy1) > 20)
         prim[0][primc++] = fipo(4, grid[i][ij[j + 1]].p, vec2{-.01, .01});
     cont:
@@ -134,20 +134,20 @@ void process(u8 *p) {
       pdy[j + 1] = dy1;
     }
     if (prec && !c) {
-      prim[0][primc++] = fipo(4, grid[i][pij[0]].p, vec2{.01, -.01});
-      prim[0][primc++] = fipo(4, grid[i][pij[+1]].p, .01);
+      prim[0][primc++] = fipo(4, grid[i - 1][pij[0]].p, vec2{.01, -.01});
+      prim[0][primc++] = fipo(4, grid[i - 1][pij[+1]].p, .01);
     }
     for (u32 i = 0; i < 20; ++i)
       pij[i] = ij[i];
     prec = c;
   }
 
-  for (u32 i = 0; i < 0; ++i) {
+  for (u32 i = 0; i < 1; ++i) {
     puts("");
     for (u32 j = 0; j < primc; ++j) {
       vec2 p0 = prim[i][j];
       light(idx(page(p0)));
-  //    printf("%.3f,%.3f\t", p0.x, p0.y);
+      //    printf("%.3f,%.3f\t", p0.x, p0.y);
     }
   }
 
