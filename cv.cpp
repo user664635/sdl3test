@@ -81,40 +81,40 @@ void process(u8 *p) {
     vec2 p;
     vec2 g;
     int v;
-  } grid[17][26];
+  } grid[17][27];
   for (int i = 0; i < 17; ++i)
-    for (int j = 0; j < 25; ++j) {
-      vec2 p0 = {(i - 8) * .01f, (j - 12) * .01f};
+    for (int j = 0; j < 27; ++j) {
+      vec2 p0 = {(i - 8) * .01f, (j - 13) * .01f};
       vec2 tp0 = page(p0);
       u32 id = idx(tp0);
       grid[i][j] = {p0, tp0, p[id] < thr};
       light(id);
     }
 
-  // u32 prec = 0;
-  // vec2 prim[10][10];
-  // for (u32 i = 0; i < 17; ++i) {
-  //   int prev = 0;
-  //   u32 c = 0;
-  //   u32 ij[20];
-  //   f32 y[20];
-  //   for (u32 j = 0; j < 26; ++j) {
-  //     if (prev && !grid[i][j].v)
-  //       ij[c] = j, y[c++] = fied(4, grid[i][j - 1].g, grid[i][j].g).y;
-  //     if (!prev && grid[i][j].v)
-  //       ij[c] = j, y[c++] = fied(4, grid[i][j].g, grid[i][j - 1].g).y;
-  //     prev = grid[i][j].v;
-  //   }
-  //   for (u32 j = 0; j < c; j += 2) {
-  //     if (!prec)
-  //       prim[0][0] = grid[i][j].g, prim[0][1] = grid[i][j + 1].g;
-  //   }
-  //   prec = c;
-  // }
+  u32 prec = 0;
+  vec2 prim[10][10];
+  for (u32 i = 0; i < 17; ++i) {
+    int prev = 0;
+    u32 c = 0;
+    u32 ij[20];
+    f32 y[20];
+    for (u32 j = 1; j < 27; ++j) {
+      if (prev && !grid[i][j].v)
+        ij[c] = j, y[c++] = fied(4, grid[i][j - 1].g, grid[i][j].g).y;
+      if (!prev && grid[i][j].v)
+        ij[c] = j, y[c++] = fied(4, grid[i][j].g, grid[i][j - 1].g).y;
+      prev = grid[i][j].v;
+    }
+    for (u32 j = 0; j < c; j += 2) {
+      if (!prec)
+        prim[0][0] = grid[i][j].g, prim[0][1] = grid[i][j + 1].g;
+    }
+    prec = c;
+  }
 
-  // vec2 p0 = prim[0][0];
-  // vec2 p1 = prim[0][1];
-  // printf("%f,%f %f,%f\t", p0.x, p0.y, p1.x, p1.y);
+  vec2 p0 = prim[0][0];
+  vec2 p1 = prim[0][1];
+  printf("%f,%f %f,%f\t", p0.x, p0.y, p1.x, p1.y);
   d = base.z;
 }
 extern "C" void cv_pixel(u8 *pixel) {
