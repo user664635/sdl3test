@@ -147,9 +147,8 @@ void create_vao() {
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   if (!SDL_Init(SDL_INIT_VIDEO))
     return SDL_APP_FAILURE;
-#define WFLAGS SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY
-  if (!SDL_CreateWindowAndRenderer("test", w / 1.5, h / 1.5, WFLAGS, &window,
-                                   &renderer))
+#define WFLAGS SDL_WINDOW_OPENGL
+  if (!SDL_CreateWindowAndRenderer("test", w, h, WFLAGS, &window, &renderer))
     return SDL_APP_FAILURE;
   glViewport(0, 0, w, h);
   SDL_SetWindowRelativeMouseMode(window, 1);

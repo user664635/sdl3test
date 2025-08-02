@@ -90,10 +90,10 @@ void process(u8 *p) {
     u32 ij[20];
     f32 y[20];
     for (u32 j = 0; j < 26; ++j) {
-      if (!prev && grid[i][j].v)
-        ij[c++] = j, y[c++] = fied(4, grid[i][j].g, grid[i][j + 1].g).y;
       if (prev && !grid[i][j].v)
         ij[c++] = j, y[c++] = fied(4, grid[i][j - 1].g, grid[i][j].g).y;
+      if (!prev && grid[i][j].v)
+        ij[c++] = j, y[c++] = fied(4, grid[i][j].g, grid[i][j - 1].g).y;
       prev = grid[i][j].v;
     }
     for (u32 j = 0; j < c; j += 2) {
@@ -103,6 +103,9 @@ void process(u8 *p) {
     prec = c;
   }
 
+  uvec2 p0 = prim[0][0];
+  uvec2 p1 = prim[0][0];
+  printf("%u,%u,%u,%u\t", p0.x, p0.y, p1.x, p1.y);
   d = base.z;
 }
 extern "C" void cv_pixel(u8 *pixel) {
