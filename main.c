@@ -247,7 +247,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 }
 
 vec4 view = {0, .25, 0, 1};
-static vec4 a4p = {-a4.x / 2, 0, -1, 1};
+static vec4 a4p = {0, a4.y / 2, -1, 1};
 static Vert obj[N] = {
     {{-.25, 0, lw, 1}, black},  {{.25, 0, lw, 1}, black},
     {{-.25, 0, -lw, 1}, black}, {{.25, 0, -lw, 1}, black},
@@ -264,13 +264,14 @@ static u32 indx[N] = {0, 1, 2,  2,  1, 3,  4,  5,  6,  6,  5,  7,
 static u8 pixel[w * h * 3];
 static u32 ocnt, icnt;
 static void addrect(vec4 o, vec2 l, f32 a, vec4 c) {
-  vec4 a0 = {l.x * cos(a), l.y * sin(a)};
-  vec4 a1 = {l.x * -sin(a), l.y * cos(a)};
+  vec4 ax = {l.x * cos(a), l.y * sin(a)};
+  vec4 ay = {l.x * -sin(a), l.y * cos(a)};
+  ax /= 2, ay /= 2;
   o += a4p;
-  obj[ocnt] = (Vert){o, c};
-  obj[ocnt + 1] = (Vert){o + a0, c};
-  obj[ocnt + 2] = (Vert){o + a1, c};
-  obj[ocnt + 3] = (Vert){o + a0 + a1, c};
+  obj[ocnt] = (Vert){o - ax - ay, c};
+  obj[ocnt + 1] = (Vert){o + ax - ay, c};
+  obj[ocnt + 2] = (Vert){o - ax + ay, c};
+  obj[ocnt + 3] = (Vert){o + ax + ay, c};
 
   indx[icnt] = ocnt;
   indx[icnt + 1] = ocnt + 1;
@@ -289,10 +290,10 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   ocnt = 8;
   icnt = 12;
   addrect(0, a4.xy, 0, black);
-  addrect((vec4){.02, .02}, a4.xy - .04, 0, white);
+  addrect(0, a4.xy - .02, 0, white);
   addrect((vec4){.03, .1}, 0.07, -.2, black);
-  addrect((vec4){.13, .1}, 0.09, .5, black);
-  addrect((vec4){.1, .08}, 0.06, .1, black);
+  addrect((vec4){.04, .1}, 0.09, .5, black);
+  addrect((vec4){.05, .08}, 0.06, .1, black);
 
   // vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0,
   // cos(yaw)}}; view += (roty[0] * dir.x + roty[1] * dir.y + roty[2] * dir.z) *
