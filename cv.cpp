@@ -30,12 +30,8 @@ f32 d, x;
 void process(u8 *p) {
   constexpr u8 thr = 50;
   auto light = [&](u64 i) {
-    p[i - w * 3 + 1] = -1;
-    p[i - w * 3 + 2] = 0;
-    p[i + 1] = 0;
-    p[i + 2] = -1;
-    p[i + w * 3 + 1] = -1;
-    p[i + w * 3 + 2] = 0;
+    p[i + 1] = -1;
+    p[i + 2] = 0;
   };
   auto fied = [&](u8 n, vec2 p0, vec2 p1) {
     while (--n) {
@@ -85,6 +81,7 @@ void process(u8 *p) {
       vec2 p0 = {(i - 8) * .01f, (j - 13) * .01f};
       vec2 tp0 = page(p0);
       u32 id = idx(tp0);
+      light(id);
       grid[i][j] = {p0, tp0, p[id] < thr};
     }
 
@@ -141,7 +138,7 @@ void process(u8 *p) {
     for (u32 j = 0; j < primc; ++j) {
       vec2 p0 = prim[i][j];
       light(idx(page(p0)));
-      printf("%.3f,%.3f\t", p0.x, p0.y);
+      //printf("%.3f,%.3f\t", p0.x, p0.y);
     }
   }
 
