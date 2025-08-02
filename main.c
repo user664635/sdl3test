@@ -10,7 +10,6 @@
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 constexpr u64 N = 65536;
-constexpr u32 w = 1920, h = 1080;
 
 #define gl_error()                                                             \
   for (u32 gl_err; (gl_err = glGetError());)                                   \

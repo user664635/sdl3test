@@ -18,3 +18,4 @@ static constexpr vec4 black = {0, 0, 0, 1};
 static constexpr vec4 white = {1, 1, 1, 1};
 static const f32 lw = 2.5e-3, speed = 1e-3;
 static const vec4 a4 = {.210, .297};
+constexpr u32 w = 1920, h = 1080;
