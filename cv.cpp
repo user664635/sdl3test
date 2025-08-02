@@ -30,6 +30,10 @@ f32 d, x;
 void process(u8 *p) {
   constexpr u8 thr = 50;
   auto light = [&](u64 i) {
+    p[i - w + 1] ^= -1;
+    p[i - w + 2] ^= -1;
+    p[i + w + 1] ^= -1;
+    p[i + w + 2] ^= -1;
     p[i + 1] ^= -1;
     p[i + 2] ^= -1;
   };
@@ -97,6 +101,7 @@ void process(u8 *p) {
             goto iter;
           }
       }
+      light(idx(page(o)));
       return o;
   };
 
@@ -123,10 +128,10 @@ void process(u8 *p) {
         goto cont;
       }
       if (abs(pdy[j] - dy0) > 20)
-        printf("%d,%d\t", i, ij[j]);
-      // prim[0][primc++] = fipo(4, grid[i][ij[j]].p, vec2{-.01, -.01});
+        printf("%d,%d,%d\t", i-1, pij[j], grid[i][ij[j]].v),
+            prim[0][primc++] = fipo(4, grid[i-1][pij[j]].p, vec2{-.01, -.01});
       if (abs(pdy[j + 1] - dy1) > 20)
-        prim[0][primc++] = fipo(4, grid[i][ij[j + 1]].p, vec2{-.01, .01});
+        prim[0][primc++] = fipo(4, grid[i-1][pij[j + 1]].p, vec2{-.01, .01});
     cont:
       py[j] = y[j];
       py[j + 1] = y[j + 1];
@@ -146,7 +151,7 @@ void process(u8 *p) {
     puts("");
     for (u32 j = 0; j < primc; ++j) {
       vec2 p0 = prim[i][j];
-      light(idx(page(p0)));
+      //   light(idx(page(p0)));
       //    printf("%.3f,%.3f\t", p0.x, p0.y);
     }
   }
