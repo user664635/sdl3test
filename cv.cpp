@@ -70,7 +70,6 @@ void process(u8 *p) {
   f32 t = sqrt(trot * trot + 1);
   f32 crot = 1 / t;
   f32 srot = trot / t;
-  printf("%f\t", srot);
   vec4 base = {0, a4.y / 2, (z0 + z1) / 2, 1};
   auto page = [&](vec2 p) {
     vec4 pos = {p.x * crot, p.y, p.x * srot};
@@ -112,9 +111,24 @@ void process(u8 *p) {
     prec = c;
   }
 
+  auto fipo = [&](u32 n, vec2 o, vec2 d) {
+    iter:
+      if (--n) {
+        vec2 pos[4] = {o + d, o + d.x, o + d.y, o};
+        for (u32 i = 0; i < 4; ++i)
+          if (p[idx(pos[i]) < thr]) {
+            o = pos[i], d /= 2;
+            goto iter;
+          }
+      }
+      return o;
+  };
+
   vec2 p0 = prim[0][0];
   vec2 p1 = prim[0][1];
-  printf("%f,%f %f,%f\t", p0.x, p0.y, p1.x, p1.y);
+  vec2 p2 = fipo(4,p0,vec2{-5e-3,-5e-3});
+  light(idx(p2));
+  printf("%f,%f %f,%f\t", p2.x, p2.y, p1.x, p1.y);
   d = base.z;
 }
 extern "C" void cv_pixel(u8 *pixel) {
