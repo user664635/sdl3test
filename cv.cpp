@@ -66,22 +66,30 @@ void process(u8 *p) {
   vec2 b0 = fiba(-.05), b1 = fiba(.05);
   f32 z0 = view.y * scale / b0.y;
   f32 z1 = view.y * scale / b1.y;
-  printf("%f\t", atan((z1 - z0) * 10));
-  vec4 base = {0, a4.y, (z0 + z1) / 2, 1};
-  light(idx(trans(base)));
+  f32 trot = (z1 - z0) * 10;
+  f32 t = sqrt(trot * trot + 1);
+  f32 crot = 1 / t;
+  f32 srot = trot / t;
+  printf("%f\t", srot);
+  vec4 base = {0, a4.y / 2, (z0 + z1) / 2, 1};
+  auto page = [&](vec2 p) {
+    vec4 pos = {p.x * crot, p.y, p.x * srot};
+    return trans(base + pos);
+  };
+
   struct {
-    vec4 o;
+    vec2 p;
     vec2 g;
     int v;
   } grid[17][26];
-  // for (u32 i = 0; i < 17; ++i)
-  //   for (u32 j = 0; j < 26; ++j) {
-  //     vec4 p0 = a40 + vec4{i * .01f, j * .01f};
-  //     vec2 tp0 = trans(p0);
-  //     u32 id = idx(tp0);
-  //     grid[i][j] = {p0, tp0, p[id] < thr};
-  //     light(id);
-  //   }
+  for (int i = 0; i < 17; ++i)
+    for (int j = 0; j < 25; ++j) {
+      vec2 p0 = {(i - 8) * .01f, (j - 12) * .01f};
+      vec2 tp0 = page(p0);
+      u32 id = idx(tp0);
+      grid[i][j] = {p0, tp0, p[id] < thr};
+      light(id);
+    }
 
   // u32 prec = 0;
   // vec2 prim[10][10];
