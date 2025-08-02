@@ -106,7 +106,7 @@ void process(u8 *p) {
     }
     for (u32 j = 0; j < c; j += 2) {
       if (!prec)
-        prim[0][0] = grid[i][j].g, prim[0][1] = grid[i][j + 1].g;
+        prim[0][0] = grid[i][j].p, prim[0][1] = grid[i][j + 1].p;
     }
     prec = c;
   }
@@ -116,7 +116,7 @@ void process(u8 *p) {
       if (--n) {
         vec2 pos[4] = {o + d, o + d.x, o + d.y, o};
         for (u32 i = 0; i < 4; ++i)
-          if (p[idx(pos[i]) < thr]) {
+          if (p[idx(page(pos[i])) < thr]) {
             o = pos[i], d /= 2;
             goto iter;
           }
@@ -126,9 +126,9 @@ void process(u8 *p) {
 
   vec2 p0 = prim[0][0];
   vec2 p1 = prim[0][1];
-  vec2 p2 = fipo(4,p0,vec2{-5e-3,-5e-3});
+  vec2 p2 = fipo(4,p1,vec2{-5e-3,0});
   light(idx(p2));
-  printf("%f,%f %f,%f\t", p2.x, p2.y, p1.x, p1.y);
+  printf("%f,%f %f,%f\t", p0.x, p0.y, p1.x, p1.y);
   d = base.z;
 }
 extern "C" void cv_pixel(u8 *pixel) {
