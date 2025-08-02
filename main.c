@@ -293,8 +293,8 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   icnt = 12;
   addrect(0, a4.xy, 0, black);
   addrect(0, a4.xy - .02, 0, white);
-  addrect((vec4){.03, .1}, 0.07, -.2, black);
-  addrect((vec4){-.01, -.1}, 0.09, .5, black);
+  addrect((vec4){.03, .05}, 0.07, -.2, black);
+  addrect((vec4){-.01, -.07}, 0.09, .5, black);
   addrect((vec4){-.05, .08}, 0.06, .3, black);
 
   // vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0,

@@ -91,6 +91,7 @@ void process(u8 *p) {
 
   u32 prec = 0;
   vec2 prim[10][10];
+  f32 py[10], pdy[10];
   for (u32 i = 0; i < 17; ++i) {
     int prev = 0;
     u32 c = 0;
@@ -104,8 +105,16 @@ void process(u8 *p) {
       prev = grid[i][j].v;
     }
     for (u32 j = 0; j < c; j += 2) {
-      if (!prec && c)
-        prim[0][0] = grid[i][ij[0]].p, prim[0][1] = grid[i][ij[1]].p;
+      f32 dy0 = py[j] - y[j], dy1 = py[j + 1] - y[j + 1];
+      if (!prec) {
+        prim[0][0] = grid[i][ij[j]].p, prim[0][1] = grid[i][ij[j + 1]].p;
+        goto cont;
+      }
+      if (abs(pdy[j] - dy0) > 5)
+        printf("%d,%d\t", i, ij[j]);
+    cont:
+      pdy[j] = dy0;
+      pdy[j + 1] = dy1;
     }
     prec = c;
   }
