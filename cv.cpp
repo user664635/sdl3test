@@ -6,7 +6,7 @@ using namespace cv;
 
 #define w cam_w
 #define h cam_h
-u32 cam_w = 1920, cam_h  = 1080;
+u32 cam_w = 1920, cam_h = 1080;
 VideoCapture cap;
 extern "C" void cv_init() {
   cap = VideoCapture(2);
@@ -49,16 +49,6 @@ void process(u8 *p) {
     light(idx(p0));
     return p0;
   };
-  auto fipo = [&](u8 n, vec2 m, vec2 d) {
-    vec2 rd = {d.y, -d.x};
-    while (--n) {
-      vec2 t = fied(4, m, m + d);
-      bool dir = p[idx(t + rd / 32)] > thr;
-      vec2 t1 = fied(4, t, t + (dir ? rd : -rd));
-      m = (t + t1) / 2;
-    }
-    return m;
-  };
 
   auto fiba = [&](f32 x) {
     vec4 axis = {x, 0, -2.1, 1};
@@ -93,39 +83,23 @@ void process(u8 *p) {
     }
 
   u32 prec = 0;
-  vec2 prey[8];
-  vec2 predy[8];
-  vec2 pos[4][4];
   for (u32 i = 0; i < 17; ++i) {
     int prev = 0;
     u32 c = 0;
-    vec2 y[8];
+    u32 y[20];
     for (u32 j = 0; j < 26; ++j) {
       if (!prev && grid[i][j].v)
-        y[c++] = fied(4, grid[i][j].g, grid[i][j - 1].g);
+        y[c++] = j;
       if (prev && !grid[i][j].v)
-        y[c++] = fied(4, grid[i][j - 1].g, grid[i][j].g);
+        y[c++] = j;
       prev = grid[i][j].v;
     }
-//    for (u32 j = 0; j < c; j += 2) {
-//      if (!prec)
-//        printf("%d,%d\t", i, j),
-//            pos[0][0] = fipo(4, (y[j] + y[j + 1]) / 2, vec2{-16, 0});
-//      vec2 dy = y[j] - prey[j];
-//      if (predy[j].y < dy.y)
-//        printf("%d,%d,%f\t", i, j, predy[j].y),
-//            pos[0][1] = fipo(4, (y[j] + prey[j]) / 2, vec2{0, -16});
-//      prey[j] = y[j];
-//      predy[j] = dy;
-//      dy = y[j + 1] - prey[j + 1];
-//      if (predy[j + 1].y > dy.y)
-//        pos[0][2] = fipo(4, (y[j + 1] + prey[j + 1]) / 2, vec2{0, 16});
-//      prey[j + 1] = y[j + 1];
-//      predy[j + 1] = dy;
-//    }
-//    prec = c;
+    for (u32 j = 0; j < c; j += 2) {
+      if (!prec)
+        printf("%d,%d\t", i, y[j]);
+    }
+    prec = c;
   }
-//  // f32 l = length(pos[0][1] - pos[0][0]) * -base.z / scale;
   d = base.z;
 }
 extern "C" void cv_pixel(u8 *pixel) {

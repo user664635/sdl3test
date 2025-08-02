@@ -298,8 +298,9 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   obj[15] = (Vert){a4p + a4 - (vec4){.02, .02, 0}, white};
   ocnt = 16;
   icnt = 24;
-  addsq((vec4){.1, .1}, 0.07, 1);
+  addsq((vec4){.03, .1}, 0.07, -.2);
   addsq((vec4){.13, .1}, 0.09, .5);
+  addsq((vec4){.1, .08}, 0.06, .1);
 
   // vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0,
   // cos(yaw)}}; view += (roty[0] * dir.x + roty[1] * dir.y + roty[2] * dir.z) *
