@@ -83,23 +83,26 @@ void process(u8 *p) {
     }
 
   u32 prec = 0;
+  uvec2 prim[10][10];
   for (u32 i = 0; i < 17; ++i) {
     int prev = 0;
     u32 c = 0;
-    u32 y[20];
+    u32 ij[20];
+    f32 y[20];
     for (u32 j = 0; j < 26; ++j) {
       if (!prev && grid[i][j].v)
-        y[c++] = j;
+        ij[c++] = j, y[c++] = fied(4, grid[i][j].g, grid[i][j + 1].g).y;
       if (prev && !grid[i][j].v)
-        y[c++] = j;
+        ij[c++] = j, y[c++] = fied(4, grid[i][j - 1].g, grid[i][j].g).y;
       prev = grid[i][j].v;
     }
     for (u32 j = 0; j < c; j += 2) {
       if (!prec)
-        printf("%d,%d\t", i, y[j]);
+        prim[0][0] = {i, ij[j]}, prim[0][1] = {i, ij[j + 1]};
     }
     prec = c;
   }
+
   d = base.z;
 }
 extern "C" void cv_pixel(u8 *pixel) {
