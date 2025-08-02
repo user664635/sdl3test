@@ -128,10 +128,10 @@ void process(u8 *p) {
         goto cont;
       }
       if (abs(pdy[j] - dy0) > 20)
-        printf("%d,%d,%d\t", i-1, pij[j], grid[i][ij[j]].v),
-            prim[0][primc++] = fipo(4, grid[i-1][pij[j]].p, vec2{-.01, -.01});
+        printf("%d,%d,%d\t", i - 1, pij[j], grid[i][ij[j]].v),
+            prim[0][primc++] = fipo(4, grid[i - 1][pij[j]].p, vec2{-.01, -.01});
       if (abs(pdy[j + 1] - dy1) > 20)
-        prim[0][primc++] = fipo(4, grid[i-1][pij[j + 1]].p, vec2{-.01, .01});
+        prim[0][primc++] = fipo(4, grid[i - 1][pij[j + 1]].p, vec2{-.01, .01});
     cont:
       py[j] = y[j];
       py[j + 1] = y[j + 1];
@@ -147,14 +147,20 @@ void process(u8 *p) {
     prec = c;
   }
 
-  for (u32 i = 0; i < 1; ++i) {
-    puts("");
-    for (u32 j = 0; j < primc; ++j) {
-      vec2 p0 = prim[i][j];
-      //   light(idx(page(p0)));
-      //    printf("%.3f,%.3f\t", p0.x, p0.y);
-    }
+  vec2 ex[4] = {{1, 0}, {-1, 0}, {0, -1}, {0, 1}};
+  for (int i = 0; i < primc; ++i) {
+    vec2 p = prim[0][i];
+    if (ex[0].x > p.x)
+      ex[0] = p;
+    else if (ex[2].x < p.x)
+      ex[2] = p;
+    if (ex[1].y < p.y)
+      ex[1] = p;
+    else if (ex[3].y > p.y)
+      ex[3] = p;
   }
+  for (u32 i = 0; i < 4; ++i)
+    printf("%f,", length(ex[i] - ex[i + 1 & 3]));
 
   d = base.z;
 }
