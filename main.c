@@ -248,7 +248,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 }
 
 vec4 view = {0, .2, 0, 1};
-static vec4 a4p = {0, a4.y / 2, -2, 1};
+static vec4 a4p = {0, a4.y / 2, -1, 1};
 static Vert obj[N] = {
     {{-.25, 0, lw, 1}, black},  {{.25, 0, lw, 1}, black},
     {{-.25, 0, -lw, 1}, black}, {{.25, 0, -lw, 1}, black},
@@ -295,7 +295,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   addrect(0, a4.xy - .02, 0, white);
   addrect((vec4){.03, .1}, 0.07, -.2, black);
   addrect((vec4){-.01, -.1}, 0.09, .5, black);
-  addrect((vec4){-.045, .08}, 0.06, .3, black);
+  addrect((vec4){-.05, .08}, 0.06, .3, black);
 
   // vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0,
   // cos(yaw)}}; view += (roty[0] * dir.x + roty[1] * dir.y + roty[2] * dir.z) *
