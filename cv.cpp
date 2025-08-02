@@ -87,6 +87,7 @@ void process(u8 *p) {
       vec2 tp0 = page(p0);
       u32 id = idx(tp0);
       grid[i][j] = {p0, tp0, p[id] < thr};
+      light(id);
     }
 
   u32 prec = 0;
@@ -111,8 +112,12 @@ void process(u8 *p) {
         goto cont;
       }
       if (abs(pdy[j] - dy0) > 5)
-        printf("%d,%d\t", i, ij[j]);
+        printf("%d,%d,%f\t", i, ij[j], y[j]);
+      if (abs(pdy[j + 1] - dy1) > 5)
+        printf("%d,%d,%f\t", i, ij[j + 1], y[j + 1]);
     cont:
+      py[j] = y[j];
+      py[j + 1] = y[j + 1];
       pdy[j] = dy0;
       pdy[j + 1] = dy1;
     }
