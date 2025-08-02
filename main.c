@@ -246,7 +246,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 }
 
 vec4 view = {0, .2, 0, 1};
-static vec4 a4p = {0, a4.y / 2, -1, 1};
+static vec4 a4p = {0, a4.y / 2, -2, 1};
 static Vert obj[N] = {
     {{-.25, 0, lw, 1}, black},  {{.25, 0, lw, 1}, black},
     {{-.25, 0, -lw, 1}, black}, {{.25, 0, -lw, 1}, black},
@@ -262,7 +262,7 @@ static u32 indx[N] = {0, 1, 2,  2,  1, 3,  4,  5,  6,  6,  5,  7,
 #define cos __builtin_elementwise_cos
 static u8 pixel[w * h * 3];
 static u32 ocnt, icnt;
-static f32 rot = -1;
+static f32 rot = -.5;
 static void addrect(vec4 o, vec2 l, f32 a, vec4 c) {
   vec4 ax = {l.x * cos(a), l.y * sin(a)};
   vec4 ay = {l.x * -sin(a), l.y * cos(a)};
