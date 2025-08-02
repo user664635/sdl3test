@@ -28,7 +28,6 @@ auto idx(vec2 p) {
 u8 *res;
 f32 d, x;
 void process(u8 *p) {
-
   res = p;
   constexpr u8 thr = 50;
   auto light = [&](u64 i) {
@@ -87,7 +86,10 @@ void process(u8 *p) {
   for (u32 i = 0; i < 17; ++i)
     for (u32 j = 0; j < 26; ++j) {
       vec4 p0 = a40 + vec4{i * .01f, j * .01f};
-      grid[i][j] = {p0, trans(p0), p[idx(trans(p0))] < thr};
+      vec2 tp0 = trans(p0);
+      u32 id = idx(tp0);
+      grid[i][j] = {p0, tp0, p[id] < thr};
+      light(id);
     }
 
   u32 prec = 0;

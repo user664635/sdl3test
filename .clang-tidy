@@ -1,0 +1,8 @@
+Checks: >-
+  clang-analyzer-*,
+  performance-*,
+  llvm-*,
+  portability-*,
+  cppcoreguideelines-*,
+HeaderFilterRegex: '.*'
+FormatStyle:    none
