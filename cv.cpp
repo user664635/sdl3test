@@ -45,7 +45,6 @@ void process(u8 *p) {
       else
         p1 = m;
     }
-    light(idx(p0));
     return p0;
   };
 
@@ -76,7 +75,7 @@ void process(u8 *p) {
     return trans(base + pos);
   };
 
-  struct {
+  static struct {
     vec2 p;
     vec2 g;
     int v;
@@ -103,7 +102,7 @@ void process(u8 *p) {
   };
 
   u32 prec = 0, primc = 0;
-  vec2 prim[10][64]{};
+  static vec2 prim[10][64]{};
   f32 py[10], pdy[10];
   for (u32 i = 0; i < 17; ++i) {
     int prev = 0;
@@ -120,8 +119,8 @@ void process(u8 *p) {
     for (u32 j = 0; j < c; j += 2) {
       f32 dy0 = py[j] - y[j], dy1 = py[j + 1] - y[j + 1];
       if (!prec) {
-        prim[0][primc++] = fipo(4, grid[i][ij[j]].p, -.01),
-        prim[0][primc++] = fipo(4, grid[i][ij[j + 1]].p, vec2{-.01, 01});
+        prim[0][primc++] = fipo(4, grid[i][ij[j]].p, -.01);
+        prim[0][primc++] = fipo(4, grid[i][ij[j + 1]].p, vec2{-.01, .01});
         goto cont;
       }
       if (abs(pdy[j] - dy0) > 20)
@@ -141,6 +140,7 @@ void process(u8 *p) {
     puts("");
     for (u32 j = 0; j < primc; ++j) {
       vec2 p0 = prim[i][j];
+      light(idx(page(p0)));
       printf("%.3f,%.3f\t", p0.x, p0.y);
     }
   }
