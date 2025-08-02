@@ -10,6 +10,7 @@
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 constexpr u64 N = 65536;
+constexpr u32 w = 1920, h = 1080;
 
 #define gl_error()                                                             \
   for (u32 gl_err; (gl_err = glGetError());)                                   \
@@ -318,12 +319,13 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   gl_error();
 
   extern u8 *res;
-  extern f32 d,x;
+  extern f32 d, x;
+  extern u32 cam_w, cam_h;
   cv_pixel(pixel);
   printf("%f\t%f\t%f\n", a4p.z, d, x);
   glBindTexture(GL_TEXTURE_2D, result);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE,
-               res);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cam_w, cam_h, 0, GL_RGB,
+               GL_UNSIGNED_BYTE, res);
   glUseProgram(ui_shader);
   glBindVertexArray(ui_vao);
   glBindBuffer(GL_ARRAY_BUFFER, ui_vbo);
