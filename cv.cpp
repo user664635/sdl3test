@@ -87,11 +87,23 @@ void process(u8 *p) {
       vec2 tp0 = page(p0);
       u32 id = idx(tp0);
       grid[i][j] = {p0, tp0, p[id] < thr};
-      light(id);
     }
 
-  u32 prec = 0;
-  vec2 prim[10][10];
+  auto fipo = [&](u32 n, vec2 o, vec2 d) {
+    iter:
+      if (--n) {
+        vec2 pos[4] = {o + d, o + vec2{d.x, 0}, o + vec2{0, d.y}, o};
+        for (u32 i = 0; i < 4; ++i)
+          if (p[idx(page(pos[i]))] < thr) {
+            o = pos[i], d /= 2;
+            goto iter;
+          }
+      }
+      return o;
+  };
+
+  u32 prec = 0, primc = 0;
+  vec2 prim[10][64]{};
   f32 py[10], pdy[10];
   for (u32 i = 0; i < 17; ++i) {
     int prev = 0;
@@ -108,13 +120,14 @@ void process(u8 *p) {
     for (u32 j = 0; j < c; j += 2) {
       f32 dy0 = py[j] - y[j], dy1 = py[j + 1] - y[j + 1];
       if (!prec) {
-        prim[0][0] = grid[i][ij[j]].p, prim[0][1] = grid[i][ij[j + 1]].p;
+        prim[0][primc++] = fipo(4, grid[i][ij[j]].p, -.01),
+        prim[0][primc++] = fipo(4, grid[i][ij[j + 1]].p, vec2{-.01, 01});
         goto cont;
       }
-      if (abs(pdy[j] - dy0) > 5)
-        printf("%d,%d,%f\t", i, ij[j], y[j]);
-      if (abs(pdy[j + 1] - dy1) > 5)
-        printf("%d,%d,%f\t", i, ij[j + 1], y[j + 1]);
+      if (abs(pdy[j] - dy0) > 20)
+        prim[0][primc++] = fipo(4, grid[i][ij[j]].p, vec2{0, -.01});
+      if (abs(pdy[j + 1] - dy1) > 20)
+        prim[0][primc++] = fipo(4, grid[i][ij[j + 1]].p, vec2{0, .01});
     cont:
       py[j] = y[j];
       py[j + 1] = y[j + 1];
@@ -124,29 +137,13 @@ void process(u8 *p) {
     prec = c;
   }
 
-  auto fipo = [&](u32 n, vec2 o, vec2 d) {
-    iter:
-      if (--n) {
-        vec2 pos[4] = {o + d, o + vec2{d.x, 0}, o + vec2{0, d.y}, o};
-        for (u32 i = 0; i < 4; ++i)
-          if (p[idx(page(pos[i]))] < thr) {
-            o = pos[i], d /= 2;
-            goto iter;
-          }
-      }
-      return o;
-  };
-
-  vec2 p0 = prim[0][1];
-  p0 = fipo(4, p0, vec2{-.01, .01});
-  light(idx(page(p0)));
-  // for (u32 i = 0; i < 1; ++i) {
-  //   puts("");
-  //   for (u32 j = 0; j < 2; ++j) {
-  //     vec2 p0 = prim[i][j];
-  //     printf("%.3f,%.3f\t", p0.x, p0.y);
-  //   }
-  // }
+  for (u32 i = 0; i < 1; ++i) {
+    puts("");
+    for (u32 j = 0; j < primc; ++j) {
+      vec2 p0 = prim[i][j];
+      printf("%.3f,%.3f\t", p0.x, p0.y);
+    }
+  }
 
   d = base.z;
 }
