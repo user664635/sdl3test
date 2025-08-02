@@ -65,22 +65,21 @@ void process(u8 *p) {
   };
   f32 z0 = view.y * scale / fiba(-.05).y;
   f32 z1 = view.y * scale / fiba(.05).y;
-  vec4 base = {0, 0, (z0 + z1) / 2, 1};
+  vec4 base = {0, a4.y, (z0 + z1) / 2, 1};
   light(idx(trans(base)));
-  vec4 a40 = base + vec4{-a4.x / 2 + .025f, .0235f};
   struct {
     vec4 o;
     vec2 g;
     int v;
   } grid[17][26];
-  for (u32 i = 0; i < 17; ++i)
-    for (u32 j = 0; j < 26; ++j) {
-      vec4 p0 = a40 + vec4{i * .01f, j * .01f};
-      vec2 tp0 = trans(p0);
-      u32 id = idx(tp0);
-      grid[i][j] = {p0, tp0, p[id] < thr};
-      light(id);
-    }
+ // for (u32 i = 0; i < 17; ++i)
+ //   for (u32 j = 0; j < 26; ++j) {
+ //     vec4 p0 = a40 + vec4{i * .01f, j * .01f};
+ //     vec2 tp0 = trans(p0);
+ //     u32 id = idx(tp0);
+ //     grid[i][j] = {p0, tp0, p[id] < thr};
+ //     light(id);
+ //   }
 
   // u32 prec = 0;
   // vec2 prim[10][10];

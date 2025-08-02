@@ -149,7 +149,6 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 #define WFLAGS SDL_WINDOW_OPENGL
   if (!SDL_CreateWindowAndRenderer("test", w, h, WFLAGS, &window, &renderer))
     return SDL_APP_FAILURE;
-  glViewport(0, 0, w, h);
   SDL_SetWindowRelativeMouseMode(window, 1);
   SDL_GL_CreateContext(window);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -174,7 +173,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 
 static vec3 dir;
 static f32 yaw, pit, rol;
-f32 scale = 3500;
+f32 scale = 3400;
 #define PI_2 1.57079632679489661922
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   switch (event->type) {
@@ -246,7 +245,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   return SDL_APP_CONTINUE;
 }
 
-vec4 view = {0, .25, 0, 1};
+vec4 view = {0, .2, 0, 1};
 static vec4 a4p = {0, a4.y / 2, -1, 1};
 static Vert obj[N] = {
     {{-.25, 0, lw, 1}, black},  {{.25, 0, lw, 1}, black},
@@ -287,7 +286,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glClearColor(.5, .5, .5, 1);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // a4p.z += dir.z * speed;
+  a4p.z += dir.z * speed;
   ocnt = 8;
   icnt = 12;
   addrect(0, a4.xy, 0, black);
@@ -296,8 +295,9 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   addrect((vec4){-.01, -.1}, 0.09, .5, black);
   addrect((vec4){-.05, .08}, 0.06, .1, black);
 
-  vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0, cos(yaw)}};
-  view += (roty[0] * dir.x + roty[1] * dir.y + roty[2] * dir.z) * speed;
+  // vec4 roty[3] = {{cos(yaw), 0, -sin(yaw)}, {0, 1, 0}, {sin(yaw), 0,
+  // cos(yaw)}}; view += (roty[0] * dir.x + roty[1] * dir.y + roty[2] * dir.z) *
+  // speed;
   vec4 rot[4] = {{sin(yaw) * sin(pit) * sin(rol) + cos(yaw) * cos(rol),
                   -cos(pit) * sin(rol),
                   cos(yaw) * sin(pit) * sin(rol) - sin(yaw) * cos(rol), 0},
