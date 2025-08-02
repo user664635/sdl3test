@@ -51,7 +51,7 @@ void process(u8 *p) {
 
   auto fiba = [&](f32 x) {
     vec4 axis = {x, 0, -2.1, 1};
-    vec4 axis0 = {x, 0, -1, 1};
+    vec4 axis0 = {x, 0, -.9, 1};
     vec2 start = trans(axis0);
     vec2 end = trans(axis);
     constexpr u32 n = 32;
@@ -63,9 +63,10 @@ void process(u8 *p) {
     }
     return end;
   };
-  vec2 b = (fiba(-.05) + fiba(.05)) / 2;
-  light(idx(b));
-  vec4 base = {0, 0, view.y * scale / b.y, 1};
+  f32 z0 = view.y * scale / fiba(-.05).y;
+  f32 z1 = view.y * scale / fiba(.05).y;
+  vec4 base = {0, 0, (z0 + z1) / 2, 1};
+  light(idx(trans(base)));
   vec4 a40 = base + vec4{-a4.x / 2 + .025f, .0235f};
   struct {
     vec4 o;
@@ -81,37 +82,37 @@ void process(u8 *p) {
       light(id);
     }
 
-  u32 prec = 0;
-  vec2 prim[10][10];
-  for (u32 i = 0; i < 17; ++i) {
-    int prev = 0;
-    u32 c = 0;
-    u32 ij[20];
-    f32 y[20];
-    for (u32 j = 0; j < 26; ++j) {
-      if (prev && !grid[i][j].v)
-        ij[c] = j, y[c++] = fied(4, grid[i][j - 1].g, grid[i][j].g).y;
-      if (!prev && grid[i][j].v)
-        ij[c] = j, y[c++] = fied(4, grid[i][j].g, grid[i][j - 1].g).y;
-      prev = grid[i][j].v;
-    }
-    for (u32 j = 0; j < c; j += 2) {
-      if (!prec)
-        prim[0][0] = grid[i][j].g, prim[0][1] = grid[i][j + 1].g;
-    }
-    prec = c;
-  }
+  // u32 prec = 0;
+  // vec2 prim[10][10];
+  // for (u32 i = 0; i < 17; ++i) {
+  //   int prev = 0;
+  //   u32 c = 0;
+  //   u32 ij[20];
+  //   f32 y[20];
+  //   for (u32 j = 0; j < 26; ++j) {
+  //     if (prev && !grid[i][j].v)
+  //       ij[c] = j, y[c++] = fied(4, grid[i][j - 1].g, grid[i][j].g).y;
+  //     if (!prev && grid[i][j].v)
+  //       ij[c] = j, y[c++] = fied(4, grid[i][j].g, grid[i][j - 1].g).y;
+  //     prev = grid[i][j].v;
+  //   }
+  //   for (u32 j = 0; j < c; j += 2) {
+  //     if (!prec)
+  //       prim[0][0] = grid[i][j].g, prim[0][1] = grid[i][j + 1].g;
+  //   }
+  //   prec = c;
+  // }
 
-  vec2 p0 = prim[0][0];
-  vec2 p1 = prim[0][1];
-  printf("%f,%f %f,%f\t", p0.x, p0.y, p1.x, p1.y);
+  // vec2 p0 = prim[0][0];
+  // vec2 p1 = prim[0][1];
+  // printf("%f,%f %f,%f\t", p0.x, p0.y, p1.x, p1.y);
   d = base.z;
 }
 extern "C" void cv_pixel(u8 *pixel) {
   static Mat img(h, w, CV_8UC3, pixel);
   flip(img, img, 0);
   res = img.data;
-  //process(img.data);
+  process(img.data);
 
   flip(img, img, 0);
 }

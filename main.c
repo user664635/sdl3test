@@ -174,7 +174,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 
 static vec3 dir;
 static f32 yaw, pit, rol;
-f32 scale = 4000;
+f32 scale = 3500;
 #define PI_2 1.57079632679489661922
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   switch (event->type) {
@@ -263,7 +263,7 @@ static u32 indx[N] = {0, 1, 2,  2,  1, 3,  4,  5,  6,  6,  5,  7,
 #define cos __builtin_elementwise_cos
 static u8 pixel[w * h * 3];
 static u32 ocnt, icnt;
-static f32 rot = 1;
+static f32 rot = -1;
 static void addrect(vec4 o, vec2 l, f32 a, vec4 c) {
   vec4 ax = {l.x * cos(a), l.y * sin(a)};
   vec4 ay = {l.x * -sin(a), l.y * cos(a)};
